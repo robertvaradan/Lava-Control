@@ -27,7 +27,7 @@ public class Settings
             return; // One of them fine.
         }
 
-        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
+        File f = new File(System.getProperty("user.home") + "/Library/LavaControl/settings.ccq");
         f.delete();
 
         f.getParentFile().mkdirs();
