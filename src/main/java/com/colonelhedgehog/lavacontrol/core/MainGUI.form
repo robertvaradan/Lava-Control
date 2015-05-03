@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.colonelhedgehog.lavacontrol.core.MainGUI">
+  <grid id="27dc6" binding="MainPanel" layout-manager="FormLayout">
+    <rowspec value="center:31px:noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:20px:noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:438px:grow"/>
+    <rowspec value="center:42px:noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:11px:noGrow"/>
+    <colspec value="fill:10px:noGrow"/>
+    <colspec value="fill:46dlu:noGrow"/>
+    <colspec value="fill:42dlu:grow"/>
+    <colspec value="fill:4dlu:noGrow"/>
+    <colspec value="fill:122px:noGrow"/>
+    <colspec value="fill:max(d;4px):noGrow"/>
+    <colspec value="fill:23dlu:noGrow"/>
+    <colspec value="fill:max(d;4px):noGrow"/>
+    <colspec value="fill:15dlu:noGrow"/>
+    <colspec value="fill:31px:noGrow"/>
+    <colspec value="fill:48dlu:noGrow"/>
+    <colspec value="fill:14px:noGrow"/>
+    <colspec value="fill:44dlu:noGrow"/>
+    <colspec value="fill:max(d;4px):noGrow"/>
+    <colspec value="fill:34dlu:noGrow"/>
+    <colspec value="fill:105px:noGrow"/>
+    <colspec value="fill:3dlu:noGrow"/>
+    <constraints>
+      <xy x="20" y="20" width="886" height="600"/>
+    </constraints>
+    <properties>
+      <minimumSize width="800" height="600"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="bfb36" class="javax.swing.JTextField" binding="jarPath">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="14" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="/"/>
+          <toolTipText value="Press &quot;return&quot; in the field to update the jar list. "/>
+        </properties>
+      </component>
+      <component id="2bf2d" class="javax.swing.JButton" binding="chooseJar">
+        <constraints>
+          <grid row="0" column="15" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="&amp;Choose Jar"/>
+          <toolTipText value="Put the directory to your Bukkit/Spigot Jar here."/>
+        </properties>
+      </component>
+      <scrollpane id="ca4c7" binding="pluginList">
+        <constraints>
+          <grid row="6" column="1" row-span="2" col-span="15" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms top="10" left="10" bottom="10" right="10" defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <autoscrolls value="false"/>
+          <horizontalScrollBarPolicy value="31"/>
+          <opaque value="false"/>
+          <toolTipText value="Uncheck a plugin and it will be renamed with a ._jar extension. Check to set the extension back to a .jar extension."/>
+          <verticalScrollBarPolicy value="20"/>
+        </properties>
+        <clientProperties>
+          <html.disable class="java.lang.Boolean" value="true"/>
+        </clientProperties>
+        <border type="bevel-lowered">
+          <font/>
+        </border>
+        <children/>
+      </scrollpane>
+      <component id="7e21b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="Max Memory:"/>
+        </properties>
+      </component>
+      <component id="3b185" class="javax.swing.JTextField" binding="memoryBash">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="512"/>
+          <toolTipText value="Memory is in megabytes. 1024 megabytes = 1 gigabyte."/>
+        </properties>
+      </component>
+      <component id="261cb" class="javax.swing.JSeparator">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="15" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="4da08" class="javax.swing.JButton" binding="launchJar">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="15" vsize-policy="0" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+          <forms top="0" left="0" bottom="2" right="0" defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <maximumSize width="200" height="60"/>
+          <minimumSize width="200" height="60"/>
+          <preferredSize width="200" height="60"/>
+          <selected value="false"/>
+          <text value="Start Server"/>
+          <verifyInputWhenFocusTarget value="false"/>
+        </properties>
+      </component>
+      <component id="37a2b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="Max Console Lines:"/>
+        </properties>
+      </component>
+      <component id="febf4" class="javax.swing.JTextField" binding="maxConsoleLines">
+        <constraints>
+          <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="100"/>
+          <toolTipText value="The number of lines for the virtual console to cache."/>
+        </properties>
+      </component>
+      <component id="ad93" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="8" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="SSH:"/>
+          <toolTipText value="A (S)ecure (Sh)ell connection allows you to run external servers using Lava Control."/>
+        </properties>
+      </component>
+      <component id="8e573" class="javax.swing.JCheckBox" binding="sshEnabled">
+        <constraints>
+          <grid row="2" column="9" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value=""/>
+          <toolTipText value="A (S)ecure (Sh)ell connection allows you to run external servers using Lava Control."/>
+        </properties>
+      </component>
+      <component id="ffe95" class="javax.swing.JTextField" binding="sshUsername">
+        <constraints>
+          <grid row="2" column="10" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="Username"/>
+          <toolTipText value="The SSH username."/>
+        </properties>
+      </component>
+      <component id="1c32f" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="11" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="@"/>
+        </properties>
+      </component>
+      <component id="4aba0" class="javax.swing.JTextField" binding="sshHost">
+        <constraints>
+          <grid row="2" column="12" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="Host"/>
+          <toolTipText value="The SSH host is an IP."/>
+        </properties>
+      </component>
+      <component id="37c88" class="javax.swing.JLabel" binding="passwordLabel">
+        <constraints>
+          <grid row="2" column="14" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="Password:"/>
+        </properties>
+      </component>
+      <component id="e78db" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="Plugins:"/>
+        </properties>
+      </component>
+      <component id="2f311" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="(Check and uncheck to enable and disable)"/>
+        </properties>
+      </component>
+      <component id="830fb" class="javax.swing.JPasswordField" binding="sshPassword">
+        <constraints>
+          <grid row="2" column="15" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <toolTipText value="The SSH password."/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

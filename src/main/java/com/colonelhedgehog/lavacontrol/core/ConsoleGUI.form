@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.colonelhedgehog.lavacontrol.core.ConsoleGUI">
+  <grid id="27dc6" binding="ConsolePanel" layout-manager="FormLayout">
+    <rowspec value="center:31px:noGrow"/>
+    <rowspec value="center:d:grow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <colspec value="left:125px:noGrow"/>
+    <colspec value="left:125dlu:grow"/>
+    <colspec value="fill:76px:noGrow"/>
+    <colspec value="right:max(d;4px):noGrow"/>
+    <colspec value="left:d:noGrow"/>
+    <constraints>
+      <xy x="20" y="20" width="597" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="3e301" class="javax.swing.JTextField" binding="consoleInput">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms top="0" left="10" bottom="5" right="10" defaultalign-horz="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="f8684" class="javax.swing.JButton" binding="exportLogButton" default-binding="true">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="Export Log"/>
+        </properties>
+      </component>
+      <scrollpane id="9b37f" binding="scrollPane">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms top="10" left="10" bottom="10" right="10" defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <autoscrolls value="true"/>
+          <horizontalScrollBarPolicy value="31"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="4ea30" class="javax.swing.JTextArea" binding="consoleText">
+            <constraints/>
+            <properties>
+              <text value=""/>
+              <wrapStyleWord value="true"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <component id="91da" class="javax.swing.JButton" binding="killButton" default-binding="true">
+        <constraints>
+          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="Kill"/>
+        </properties>
+      </component>
+      <component id="eb8e3" class="javax.swing.JButton" binding="stopButton" default-binding="true">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <text value="Stop"/>
+        </properties>
+      </component>
+      <component id="cb2a0" class="javax.swing.JCheckBox" binding="stickyScrollbar">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <selected value="true"/>
+          <text value="&amp;Keep Scrollbar at Bottom"/>
+          <toolTipText value="Keep scrollbar at the bottom of the log when an entry is added."/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
