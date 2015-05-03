@@ -79,7 +79,7 @@ public class Main
         {
             ml = Integer.parseInt(mainGUI.maxConsoleLines.getText());
         }
-        catch(NumberFormatException nfe)
+        catch (NumberFormatException nfe)
         {
             // Whatever :(
         }
@@ -89,76 +89,96 @@ public class Main
 
     private static void createMainGUI()
     {
-        settings = new Settings();
-
-        menuFrame = new JFrame("Lava Control | Main");
-        if(mainGUI == null)
+        Thread uithread = new Thread(new Runnable()
         {
-            mainGUI = new MainGUI();
-        }
+            @Override
+            public void run()
+            {
 
-        menuFrame.setContentPane(mainGUI.MainPanel);
-        menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        menuFrame.setBounds(0, 0, 800, 600);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        menuFrame.setLocation(dim.width / 2 - menuFrame.getSize().width / 2 - 10, dim.height / 2 - menuFrame.getSize().height / 2 - 10);
-        menuFrame.setVisible(true);
-        System.out.println("[Lava Control] Created Lava Control's GUI.");
 
-        mainGUI.jarPath.setText(settings.getField(Settings.Field.LAST_PATH).toString());
-        mainGUI.memoryBash.setText(settings.getField(Settings.Field.MEM_BASH).toString());
-        mainGUI.maxConsoleLines.setText(settings.getField(Settings.Field.MAX_CONSOLE_LINES).toString());
-        mainGUI.sshEnabled.setSelected(Boolean.parseBoolean(settings.getField(Settings.Field.SSH_ENABLED).toString()));
-        mainGUI.sshHost.setText(settings.getField(Settings.Field.SSH_HOST).toString());
-        mainGUI.sshUsername.setText(settings.getField(Settings.Field.SSH_USERNAME).toString());
-        mainGUI.sshPassword.setText(settings.getField(Settings.Field.SSH_PASSWORD).toString());
+                settings = new Settings();
 
-        boolean se = mainGUI.sshEnabled.isSelected();
+                menuFrame = new JFrame("Lava Control | Main");
 
-        mainGUI.sshUsername.setEnabled(se);
-        mainGUI.sshPassword.setEnabled(se);
-        mainGUI.sshHost.setEnabled(se);
-        mainGUI.passwordLabel.setEnabled(se);
-        mainGUI.chooseJar.setEnabled(!se);
-        mainGUI.pluginList.setEnabled(!se);
+                try
+                {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
 
-        if(mainGUI.checkList != null)
-        {
-            mainGUI.checkList.setEnabled(!se);
-            mainGUI.checkList.setBorder(new RoundedCornerBorder(6));
-        }
+                if (mainGUI == null)
+                {
+                    mainGUI = new MainGUI();
+                }
 
-        mainGUI.createUIComponents();
-        listJars(new File(new File(settings.getField(Settings.Field.LAST_PATH).toString()).getParent() + "/plugins"));
-        mainGUI.pluginList.scrollRectToVisible(new Rectangle(mainGUI.pluginList.getSize()));
-        mainGUI.pluginList.setMinimumSize(mainGUI.pluginList.getSize());
-        mainGUI.pluginList.setPreferredSize(mainGUI.pluginList.getSize());
-        mainGUI.pluginList.setMaximumSize(mainGUI.pluginList.getSize());
-        mainGUI.pluginList.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+                menuFrame.setContentPane(mainGUI.MainPanel);
+                menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                menuFrame.setBounds(0, 0, 800, 600);
+                Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                menuFrame.setLocation(dim.width / 2 - menuFrame.getSize().width / 2 - 10, dim.height / 2 - menuFrame.getSize().height / 2 - 10);
+                menuFrame.setVisible(true);
+                System.out.println("[Lava Control] Created Lava Control's GUI.");
 
-        mainGUI.jarPath.setBorder(new RoundedCornerBorder(6));
-        mainGUI.pluginList.setBorder(new RoundedCornerBorder(6));
+                mainGUI.jarPath.setText(settings.getField(Settings.Field.LAST_PATH).toString());
+                mainGUI.memoryBash.setText(settings.getField(Settings.Field.MEM_BASH).toString());
+                mainGUI.maxConsoleLines.setText(settings.getField(Settings.Field.MAX_CONSOLE_LINES).toString());
+                mainGUI.sshEnabled.setSelected(Boolean.parseBoolean(settings.getField(Settings.Field.SSH_ENABLED).toString()));
+                mainGUI.sshHost.setText(settings.getField(Settings.Field.SSH_HOST).toString());
+                mainGUI.sshUsername.setText(settings.getField(Settings.Field.SSH_USERNAME).toString());
+                mainGUI.sshPassword.setText(settings.getField(Settings.Field.SSH_PASSWORD).toString());
 
-        mainGUI.memoryBash.setBorder(new RoundedCornerBorder(6));
-        mainGUI.sshUsername.setBorder(new RoundedCornerBorder(6));
-        mainGUI.sshHost.setBorder(new RoundedCornerBorder(6));
-        mainGUI.sshPassword.setBorder(new RoundedCornerBorder(6));
-        mainGUI.maxConsoleLines.setBorder(new RoundedCornerBorder(6));
+                boolean se = mainGUI.sshEnabled.isSelected();
 
-        mainGUI.sshEnabled.setEnabled(false); // SSH doesn't work right now :(
-        mainGUI.sshEnabled.setToolTipText("Jar execution via SSH is disabled right now.");
+                mainGUI.sshUsername.setEnabled(se);
+                mainGUI.sshPassword.setEnabled(se);
+                mainGUI.sshHost.setEnabled(se);
+                mainGUI.passwordLabel.setEnabled(se);
+                mainGUI.chooseJar.setEnabled(!se);
+                mainGUI.pluginList.setEnabled(!se);
+
+                if (mainGUI.checkList != null)
+                {
+                    mainGUI.checkList.setEnabled(!se);
+                    mainGUI.checkList.setBorder(new RoundedCornerBorder(6));
+                }
+
+                mainGUI.createUIComponents();
+                listJars(new File(new File(settings.getField(Settings.Field.LAST_PATH).toString()).getParent() + "/plugins"));
+                mainGUI.pluginList.scrollRectToVisible(new Rectangle(mainGUI.pluginList.getSize()));
+                mainGUI.pluginList.setMinimumSize(mainGUI.pluginList.getSize());
+                mainGUI.pluginList.setPreferredSize(mainGUI.pluginList.getSize());
+                mainGUI.pluginList.setMaximumSize(mainGUI.pluginList.getSize());
+                mainGUI.pluginList.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+
+                mainGUI.jarPath.setBorder(new RoundedCornerBorder(6));
+                mainGUI.pluginList.setBorder(new RoundedCornerBorder(6));
+
+                mainGUI.memoryBash.setBorder(new RoundedCornerBorder(6));
+                mainGUI.sshUsername.setBorder(new RoundedCornerBorder(6));
+                mainGUI.sshHost.setBorder(new RoundedCornerBorder(6));
+                mainGUI.sshPassword.setBorder(new RoundedCornerBorder(6));
+                mainGUI.maxConsoleLines.setBorder(new RoundedCornerBorder(6));
+
+                mainGUI.sshEnabled.setEnabled(false); // SSH doesn't work right now :(
+                mainGUI.sshEnabled.setToolTipText("Jar execution via SSH is disabled right now.");
+            }
+        });
+        uithread.start();
     }
 
     public static void listJars(File f)
     {
-        if(mainGUI.sshEnabled.isSelected())
+        if (mainGUI.sshEnabled.isSelected())
         {
             return;
         }
 
         JCheckBox firstBox = null;
         DefaultListModel<JCheckBox> model = new DefaultListModel<>();
-        if(mainGUI.checkList != null)
+        if (mainGUI.checkList != null)
         {
             //System.out.println("Already exists lol: " + mainGUI.checkList.getName());
             mainGUI.pluginList.remove(mainGUI.checkList);
@@ -174,7 +194,7 @@ public class Main
                 {
                     JCheckBox cb = new JCheckBox(file.getName());
 
-                    if(firstBox == null)
+                    if (firstBox == null)
                     {
                         firstBox = cb;
                     }
@@ -196,7 +216,7 @@ public class Main
         mainGUI.checkList = jCheckBoxList;
         mainGUI.pluginList.setViewportView(mainGUI.checkList);
         //jCheckBoxList.setVisible(true);
-        }
+    }
 
     public static void createFileGUI()
     {

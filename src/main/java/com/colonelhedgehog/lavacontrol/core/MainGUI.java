@@ -19,7 +19,6 @@ import java.lang.management.ManagementFactory;
  */
 public class MainGUI
 {
-
     public JFrame frame;
     public JTextField jarPath;
     public JButton chooseJar;
