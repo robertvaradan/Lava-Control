@@ -1,22 +1,28 @@
 package com.colonelhedgehog.lavacontrol.core;
 
+import com.apple.eawt.AboutHandler;
+import com.apple.eawt.AppEvent;
+import com.apple.eawt.Application;
 import com.colonelhedgehog.lavacontrol.core.Components.JCheckBoxList;
 import com.colonelhedgehog.lavacontrol.core.Components.RoundedCornerBorder;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 public class Main
 {
 
+    private static ImageIcon icon;
     public static void main(String[] args)
     {
         System.out.println("[Lava Control] Loading...");
 
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
+
 
         try
         {
@@ -33,6 +39,10 @@ public class Main
             public void run()
             {
                 settings.saveSettings();
+                if (mainGUI.p != null && consoleGUI.consoleThread.isAlive())
+                {
+                    mainGUI.p.destroy();
+                }
             }
         });
 
@@ -43,6 +53,36 @@ public class Main
                 createMainGUI();
             }
         });
+        icon = new ImageIcon(Main.class.getResource("/media/logo.png"));
+
+        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+        {
+            Application application = Application.getApplication();
+            PopupMenu popupmenu = new PopupMenu("Lava Control");
+            MenuItem menuItem = new MenuItem("Start Server");
+            menuItem.addActionListener(new ActionListener()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    Main.mainGUI.launch();
+                }
+            });
+            popupmenu.add(menuItem);
+            application.setDockMenu(popupmenu);
+            application.setDockIconImage(icon.getImage());
+            application.setAboutHandler(new AboutHandler()
+            {
+                @Override
+                public void handleAbout(AppEvent.AboutEvent aboutEvent)
+                {
+                    JOptionPane.showMessageDialog(menuFrame, "Lava Control is a multi-platform application for making plugin development\n" +
+                                                             "less painful. This application was designed by ColonelHedgehog. You can view\n" +
+                                                             "his website at https://colonelhedgehog.com", "About Lava Control", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+        }
+
     }
 
     public static JFrame menuFrame;
@@ -58,10 +98,7 @@ public class Main
         consoleFrame = new JFrame("Lava Control | Console");
         System.out.println("[Lava Control] Creating Lava Control's Console GUI...");
 
-        if (consoleGUI == null)
-        {
-            consoleGUI = new ConsoleGUI();
-        }
+        consoleGUI = new ConsoleGUI();
 
         consoleFrame.setContentPane(consoleGUI.ConsolePanel);
         consoleFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -87,6 +124,10 @@ public class Main
         mc.setMessageLines(ml);
     }
 
+    public static ImageIcon getIcon()
+    {
+        return icon;
+    }
     private static void createMainGUI()
     {
         Thread uithread = new Thread(new Runnable()
@@ -99,15 +140,7 @@ public class Main
                 settings = new Settings();
 
                 menuFrame = new JFrame("Lava Control | Main");
-
-                try
-                {
-                    Thread.sleep(1000);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
+                menuFrame.setIconImage(icon.getImage());
 
                 if (mainGUI == null)
                 {

@@ -30,7 +30,6 @@ public class ConsoleGUI
     private JButton killButton;
     private JButton stopButton;
     private JCheckBox stickyScrollbar;
-    public String lastmessage = "";
     public InputStream in;
     public BufferedWriter writer;
     public Thread consoleThread;
@@ -53,6 +52,8 @@ public class ConsoleGUI
         {
             e.printStackTrace();
         }*/
+        consoleInput.setText("");
+
         consoleText.setLineWrap(true);
 
         killButton.addActionListener(killListener);

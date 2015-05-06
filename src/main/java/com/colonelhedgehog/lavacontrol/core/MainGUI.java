@@ -94,13 +94,14 @@ public class MainGUI
                 if(!sshEnabled.isSelected())
                 {
                     File chosen = new File(jarPath.getText());
+                    ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
 
                     if (chosen.exists())
                     {
                         String apath = chosen.getAbsolutePath();
                         if (!chosen.getName().endsWith(".jar"))
                         {
-                            JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.");
+                            JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
                             return;
                         }
                         Main.mainGUI.jarPath.setText(apath);
@@ -108,27 +109,28 @@ public class MainGUI
                     }
                     else
                     {
-                        JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + jarPath.getText() + "\" does not exist.");
+                        JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + jarPath.getText() + "\" does not exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
                     }
                 }
             }
         });
     }
 
-    private void launch()
+    public void launch()
     {
         Main.createConsoleGUI();
 
+        ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
         final File jar = new File(jarPath.getText());
         if(!jar.exists() && !sshEnabled.isSelected())
         {
-            JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" doesn't exist.");
+            JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" doesn't exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
 
         if(!jar.getName().endsWith(".jar"))
         {
-            JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" isn't a Jar file.");
+            JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" isn't a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
 
@@ -140,7 +142,7 @@ public class MainGUI
         }
         catch (NumberFormatException nfe)
         {
-            JOptionPane.showMessageDialog(frame, "ERROR: The memory argument \"" + memoryBash.getText() + "\" must be an integer.");
+            JOptionPane.showMessageDialog(frame, "ERROR: The memory argument \"" + memoryBash.getText() + "\" must be an integer.", "Invalid Memory Specified", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
 
@@ -148,12 +150,12 @@ public class MainGUI
 
         if(mem < 8)
         {
-            JOptionPane.showConfirmDialog(frame, "ERROR: Too little memory specified! You must put at least 8 megabytes. (512 recommended!)");
+            JOptionPane.showMessageDialog(frame, "ERROR: Too little memory specified! You must put at least 8 megabytes. (512 recommended!)", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
         if(maxMemory < 512)
         {
-            int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "I can handle it!", JOptionPane.YES_OPTION);
+            int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
             if (selected == JOptionPane.YES_OPTION)
             {
                 System.out.println("[Lava Control] *Gulp* Here goes... running with " + (512 - mem) + " less megabytes of memory than recommended.");
@@ -165,7 +167,7 @@ public class MainGUI
         }
         if(maxMemory < mem)
         {
-            int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "I can handle it!", JOptionPane.YES_OPTION);
+            int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
             if(selected == JOptionPane.YES_OPTION)
             {
                 System.out.println("[Lava Control] *Gulp* Here goes... running with " + (maxMemory - mem) + " more megabytes memory than I have available.");

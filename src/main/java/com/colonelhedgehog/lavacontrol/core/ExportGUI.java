@@ -20,8 +20,9 @@ public class ExportGUI
 
     public void show()
     {
-        int result = fc.showOpenDialog(FilePanel);
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fc.setMultiSelectionEnabled(false);
+        int result = fc.showOpenDialog(FilePanel);
 
         if (result == JFileChooser.APPROVE_OPTION)
         {
