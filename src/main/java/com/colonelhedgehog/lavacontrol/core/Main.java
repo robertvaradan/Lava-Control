@@ -20,17 +20,25 @@ public class Main
     {
         System.out.println("[Lava Control] Loading...");
 
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
+        try
+        {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
+        }
+        catch (Exception e)
+        {
+            // Whatever
+        }
 
 
         try
         {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-        catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e)
+        catch (Exception e)
         {
-            e.printStackTrace();
+            System.out.println("[Lava Control] Wasn't able to set look-and-feel. Your system may not be fully supported. ");
+            //e.printStackTrace();
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread()
@@ -42,6 +50,10 @@ public class Main
                 if (mainGUI.p != null && consoleGUI.consoleThread.isAlive())
                 {
                     mainGUI.p.destroy();
+                }
+                else if(consoleGUI.consoleThread.isAlive())
+                {
+                    consoleGUI.consoleThread.interrupt();
                 }
             }
         });
@@ -194,9 +206,6 @@ public class Main
                 mainGUI.sshHost.setBorder(new RoundedCornerBorder(6));
                 mainGUI.sshPassword.setBorder(new RoundedCornerBorder(6));
                 mainGUI.maxConsoleLines.setBorder(new RoundedCornerBorder(6));
-
-                mainGUI.sshEnabled.setEnabled(false); // SSH doesn't work right now :(
-                mainGUI.sshEnabled.setToolTipText("Jar execution via SSH is disabled right now.");
             }
         });
         uithread.start();

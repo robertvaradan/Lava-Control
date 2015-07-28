@@ -41,6 +41,9 @@ public class MainGUI
 
     public MainGUI()
     {
+        sshEnabled.setSelected(false);
+        sshEnabled.setEnabled(false); // TODO: Work on SSH stuff.
+
         launchJar.setActionCommand("Launch");
         launchJar.addActionListener(new ActionListener()
         {

@@ -27,7 +27,7 @@ public class Settings
             return; // One of them fine.
         }
 
-        File f = new File(System.getProperty("user.home") + "/Library/LavaControl/settings.ccq");
+        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
         f.delete();
 
         f.getParentFile().mkdirs();
@@ -37,7 +37,7 @@ public class Settings
         }
         catch (IOException e)
         {
-            JOptionPane.showMessageDialog(Main.menuFrame, "FATAL: Unable to create settings file at \"" + f.getAbsolutePath() + "\"!");
+            JOptionPane.showMessageDialog(Main.menuFrame, "FATAL: Unable to create settings file at \"" + f.getAbsolutePath() + "\"!", "Failed to Create Settings", JOptionPane.INFORMATION_MESSAGE, Main.getIcon());
             return;
         }
 
@@ -69,7 +69,7 @@ public class Settings
 
             for(char c : Main.mainGUI.sshPassword.getPassword())
             {
-                p.concat(String.valueOf(c));
+                p += c;
             }
 
             bw.write("\n$sshpassword = " + p);
@@ -79,7 +79,7 @@ public class Settings
         }
         catch (IOException e)
         {
-            JOptionPane.showMessageDialog(Main.menuFrame, "FATAL: Unable to save settings at \"" + f.toString() + "\"!");
+            JOptionPane.showMessageDialog(Main.menuFrame, "FATAL: Unable to save settings at \"" + f.toString() + "\"!", "Failed to Save Settings", JOptionPane.INFORMATION_MESSAGE, Main.getIcon());
             e.printStackTrace();
         }
     }

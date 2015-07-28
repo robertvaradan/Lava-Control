@@ -73,7 +73,12 @@ public class ConsoleGUI
         {
             System.out.println("[Lava Control] >>> ! FORCE KILL: Destroying process, skipping save procedures. ! <<<");
             System.out.println("[Lava Control] If possible, stop the server using the \"stop\" command/button to prevent issues.");
-            Main.mainGUI.p.destroy();
+            consoleThread.interrupt();
+
+            if(Main.mainGUI.p != null)
+            {
+                Main.mainGUI.p.destroy();
+            }
         }
     };
 
