@@ -3,6 +3,7 @@ package com.colonelhedgehog.lavacontrol.core;
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent;
 import com.apple.eawt.Application;
+import com.apple.eawt.FullScreenUtilities;
 import com.colonelhedgehog.lavacontrol.core.Components.JCheckBoxList;
 import com.colonelhedgehog.lavacontrol.core.Components.RoundedCornerBorder;
 
@@ -20,14 +21,10 @@ public class Main
     {
         System.out.println("[Lava Control] Loading...");
 
-        try
+        if(System.getProperty("os.name").contains("mac"))
         {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
-        }
-        catch (Exception e)
-        {
-            // Whatever
         }
 
 
@@ -110,6 +107,13 @@ public class Main
         consoleFrame = new JFrame("Lava Control | Console");
         System.out.println("[Lava Control] Creating Lava Control's Console GUI...");
 
+        if(System.getProperty("os.name").contains("mac"))
+        {
+            FullScreenUtilities.setWindowCanFullScreen(consoleFrame, true);
+        }
+
+        FullScreenUtilities.setWindowCanFullScreen(consoleFrame, true);
+
         consoleGUI = new ConsoleGUI();
 
         consoleFrame.setContentPane(consoleGUI.ConsolePanel);
@@ -157,6 +161,11 @@ public class Main
                 if (mainGUI == null)
                 {
                     mainGUI = new MainGUI();
+                }
+
+                if(System.getProperty("os.name").contains("mac"))
+                {
+                    FullScreenUtilities.setWindowCanFullScreen(menuFrame, true);
                 }
 
                 menuFrame.setContentPane(mainGUI.MainPanel);

@@ -1,9 +1,5 @@
 package com.colonelhedgehog.lavacontrol.core;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 
 import javax.swing.*;
 import java.io.*;
@@ -21,7 +17,6 @@ public class ProcessThread extends Thread
     private String file;
     private int mem;
     private boolean ssh;
-    public Channel channel;
 
     public ProcessThread(String file, JTextField jarPath, int mem, boolean ssh)
     {
@@ -82,9 +77,10 @@ public class ProcessThread extends Thread
                     System.out.println("[Lava Control] Initiating SSH connection.");
                     System.out.println("- Host IP: " + host);
                     System.out.println("- Username: " + username);
-                    System.out.println("- Password: " + password);
 
-                    JSch jsch = new JSch();
+                    System.out.println("- Password: " + passwordMask);
+
+                    /*JSch jsch = new JSch();
                     Session session = jsch.getSession(username, host);
                     JSch.setConfig("StrictHostKeyChecking", "no");
                     session.setPassword(password);
@@ -110,7 +106,7 @@ public class ProcessThread extends Thread
                     channel.disconnect();
                     System.out.println("[Lava Control] SSH session ended.");
                     channel.getInputStream().close();
-                    channel.getOutputStream().close();
+                    channel.getOutputStream().close();*/
                 }
                 else
                 {
@@ -163,7 +159,7 @@ public class ProcessThread extends Thread
                     Main.mainGUI.launchJar.setToolTipText("");
                 }
             }
-            catch (IOException | JSchException e)
+            catch (IOException e)
             {
                 System.out.println("[Lava Control] ERROR: Couldn't launch " + file + "! Are any of the arguments incorrect?");
                 e.printStackTrace();
