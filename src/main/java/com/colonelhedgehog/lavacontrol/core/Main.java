@@ -84,8 +84,6 @@ public class Main
             MacSetup.setCanFullscreenWindow(consoleFrame, true);
         }
 
-        MacSetup.setCanFullscreenWindow(consoleFrame, true);
-
         consoleGUI = new ConsoleGUI();
 
         consoleFrame.setContentPane(consoleGUI.ConsolePanel);
