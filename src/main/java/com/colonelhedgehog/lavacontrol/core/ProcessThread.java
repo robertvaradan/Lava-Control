@@ -170,6 +170,5 @@ public class ProcessThread extends Thread
         Thread.currentThread().interrupt();
         Main.consoleGUI.consoleThread.interrupt();
         Main.mainGUI.launchJar.setToolTipText("");
-        System.out.println("Debug done.");
     }
 }

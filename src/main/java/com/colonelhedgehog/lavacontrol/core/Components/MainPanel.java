@@ -1,4 +1,4 @@
-package com.colonelhedgehog.lavacontrol.core.Components;
+package com.colonelhedgehog.lavacontrol.core.components;
 
 public class MainPanel
 {

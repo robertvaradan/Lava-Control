@@ -1,6 +1,6 @@
 package com.colonelhedgehog.lavacontrol.core;
 
-import com.colonelhedgehog.lavacontrol.core.Components.RoundedCornerBorder;
+import com.colonelhedgehog.lavacontrol.core.components.RoundedCornerBorder;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -30,6 +30,8 @@ public class ConsoleGUI
     private JButton killButton;
     private JButton stopButton;
     private JCheckBox stickyScrollbar;
+    private JButton sendCommand;
+    private JProgressBar commandProgress;
     public InputStream in;
     public BufferedWriter writer;
     public Thread consoleThread;
@@ -64,7 +66,17 @@ public class ConsoleGUI
         DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         consoleText.setCaret(caret);
+        commandProgress.setValue(10);
     }
+
+    final ActionListener sendListener = new ActionListener()
+    {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            consoleInput.postActionEvent();
+        }
+    };
 
     final ActionListener killListener = new ActionListener()
     {
@@ -87,8 +99,10 @@ public class ConsoleGUI
         @Override
         public void actionPerformed(ActionEvent e)
         {
+            stopButton.setText("Stopping...");
             consoleInput.setText("stop");
             consoleInput.postActionEvent();
+            commandProgress.setIndeterminate(true);
         }
     };
 
@@ -117,14 +131,20 @@ public class ConsoleGUI
                     {
                         try
                         {
+                            commandProgress.setValue(20);
                             String cmd = consoleInput.getText();
                             messageHistory.add(cmd);
+                            commandProgress.setValue(40);
 
                             System.out.println("» /" + cmd);
+                            commandProgress.setValue(60);
                             writer.write(cmd + "\n");
+                            commandProgress.setValue(80);
                             consoleInput.setText("");
+                            commandProgress.setValue(100);
                             writer.flush();
                             index++;
+                            commandProgress.setValue(0);
                         }
                         catch (IOException e)
                         {
@@ -155,6 +175,7 @@ public class ConsoleGUI
             }
         };
 
+        sendCommand.addActionListener(sendListener);
         consoleThread.start();
         //DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
         //caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);*/
@@ -183,6 +204,9 @@ public class ConsoleGUI
         consoleInput.setText("Server stopped.");
         consoleInput.setEnabled(false);
         stopButton.setEnabled(false);
+        stopButton.setText("Stopped");
         killButton.setEnabled(false);
+        commandProgress.setIndeterminate(false);
+        commandProgress.setValue(0);
     }
 }

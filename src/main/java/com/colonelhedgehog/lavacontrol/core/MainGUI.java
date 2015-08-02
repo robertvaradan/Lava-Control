@@ -1,6 +1,6 @@
 package com.colonelhedgehog.lavacontrol.core;
 
-import com.colonelhedgehog.lavacontrol.core.Components.JCheckBoxList;
+import com.colonelhedgehog.lavacontrol.core.components.JCheckBoxList;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.swing.*;
