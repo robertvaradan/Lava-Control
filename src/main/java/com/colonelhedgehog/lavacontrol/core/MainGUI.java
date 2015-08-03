@@ -67,6 +67,8 @@ public class MainGUI
             }
         });
 
+        disableSSH();
+
         sshEnabled.addActionListener(new ActionListener()
         {
             @Override
@@ -114,6 +116,13 @@ public class MainGUI
                 }
             }
         });
+    }
+
+    private void disableSSH()
+    {
+        sshEnabled.setEnabled(false);
+        sshEnabled.setSelected(false);
+        sshEnabled.setToolTipText("SSH connections are currently unsupported.");
     }
 
     public void launch()

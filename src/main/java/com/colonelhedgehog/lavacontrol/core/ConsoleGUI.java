@@ -1,6 +1,7 @@
 package com.colonelhedgehog.lavacontrol.core;
 
 import com.colonelhedgehog.lavacontrol.core.components.RoundedCornerBorder;
+import com.colonelhedgehog.lavacontrol.core.components.SmoothJProgressBar;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -31,7 +32,7 @@ public class ConsoleGUI
     private JButton stopButton;
     private JCheckBox stickyScrollbar;
     private JButton sendCommand;
-    private JProgressBar commandProgress;
+    private SmoothJProgressBar commandProgress;
     public InputStream in;
     public BufferedWriter writer;
     public Thread consoleThread;
@@ -66,7 +67,7 @@ public class ConsoleGUI
         DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         consoleText.setCaret(caret);
-        commandProgress.setValue(10);
+        commandProgress.setValue(0);
     }
 
     final ActionListener sendListener = new ActionListener()
@@ -87,7 +88,7 @@ public class ConsoleGUI
             System.out.println("[Lava Control] If possible, stop the server using the \"stop\" command/button to prevent issues.");
             consoleThread.interrupt();
 
-            if(Main.mainGUI.p != null)
+            if (Main.mainGUI.p != null)
             {
                 Main.mainGUI.p.destroy();
             }
@@ -131,22 +132,20 @@ public class ConsoleGUI
                     {
                         try
                         {
-                            commandProgress.setValue(20);
+                            commandProgress.setValue(100 * 20);
                             String cmd = consoleInput.getText();
                             messageHistory.add(cmd);
-                            commandProgress.setValue(40);
+                            commandProgress.setValue(100 * 40);
 
                             System.out.println("» /" + cmd);
-                            commandProgress.setValue(60);
+                            commandProgress.setValue(100 * 60);
                             writer.write(cmd + "\n");
-                            commandProgress.setValue(80);
+                            commandProgress.setValue(100 * 80);
                             consoleInput.setText("");
-                            commandProgress.setValue(100);
+                            commandProgress.setValue(100 * 100);
                             writer.flush();
                             index++;
-                            commandProgress.setValue(0);
-                        }
-                        catch (IOException e)
+                        } catch (IOException e)
                         {
                             e.printStackTrace();
                         }
@@ -208,5 +207,84 @@ public class ConsoleGUI
         killButton.setEnabled(false);
         commandProgress.setIndeterminate(false);
         commandProgress.setValue(0);
+
+        JButton launchJar = Main.mainGUI.launchJar;
+        launchJar.setEnabled(true);
+        launchJar.setToolTipText("");
+    }
+
+    private double factor = 0;
+
+    public void determineQueues(String str)
+    {
+        String info = "\\[\\d+:\\d+:\\d+\\ INFO]: ";
+
+        if (!ServerStatic.serverInitialized)
+        {
+            // Plugin stuff
+            if(str.matches("\\[(\\w+)\\] Loading (\\w+) v/"))
+            {
+                ServerStatic.loadedPlugins++;
+            }
+
+            // Standard status stuff
+
+            if (str.matches("Loading libraries, please wait..."))
+            {
+                commandProgress.setValue(100 * 10);
+            }
+
+            if (str.matches(info + "Starting minecraft server version \\d+.\\d+.\\d+"))
+            {
+                commandProgress.setValue(100 * 25);
+            }
+
+            if (str.matches(info + "Default game type: (\\w+)"))
+            {
+                commandProgress.setValue(100 * 60);
+            }
+
+            if (str.matches(info + "Starting Minecraft server on \\*\\:\\d+"))
+            {
+                commandProgress.setValue(100 * 80);
+            }
+
+            if(commandProgress.getValue() < 100)
+            {
+                if ((str.startsWith("[Multiverse\\-Core] Loading World & Settings - ") || str.matches(info + "\\-\\-\\-\\-\\-\\-\\-\\- World Settings For \\[([^)]+)\\] \\-\\-\\-\\-\\-\\-\\-\\-")))
+                {
+                    commandProgress.setValue(100 * commandProgress.getValue() + 1); // lol, if you have 20 worlds...
+                }
+
+                if(str.matches("\\[(\\w+)\\] Enabling (\\w+) v"))
+                {
+                    if(factor == 0)
+                    {
+                        int headroom = 100 - commandProgress.getValue();
+
+                        if(headroom > 1)
+                        {
+                            factor = headroom / ServerStatic.loadedPlugins;
+                        }
+                        else
+                        {
+                            factor = -1;
+                        }
+                    }
+
+                    if(factor != -1)
+                    {
+                        commandProgress.setValue((int) ((commandProgress.getValue() + factor) * 100));
+                    }
+                }
+            }
+
+            if (str.matches(info + "Done \\(\\d+.\\d+s\\)\\! For help, type \\\"help\" or \\\"\\?\""))
+            {
+                commandProgress.setIndeterminate(false);
+                commandProgress.setValue(100 * 100);
+                ServerStatic.serverInitialized = true;
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@
           <toolTipText value="Keep scrollbar at the bottom of the log when an entry is added."/>
         </properties>
       </component>
-      <component id="dbb47" class="javax.swing.JProgressBar" binding="commandProgress">
+      <component id="dbb47" class="com.colonelhedgehog.lavacontrol.core.components.SmoothJProgressBar" binding="commandProgress">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <forms top="0" left="10" bottom="0" right="0" defaultalign-horz="false"/>
@@ -78,6 +78,7 @@
           <focusTraversalPolicyProvider value="false"/>
           <focusable value="false"/>
           <indeterminate value="false"/>
+          <maximum value="10000"/>
           <string value=""/>
           <value value="0"/>
           <verifyInputWhenFocusTarget value="true"/>

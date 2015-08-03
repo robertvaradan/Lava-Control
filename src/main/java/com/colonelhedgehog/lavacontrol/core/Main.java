@@ -12,11 +12,12 @@ public class Main
 {
 
     private static ImageIcon icon;
+
     public static void main(String[] args)
     {
         System.out.println("[Lava Control] Loading...");
 
-        if(System.getProperty("os.name").contains("mac"))
+        if(System.getProperty("os.name").toLowerCase().contains("mac"))
         {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
@@ -59,7 +60,7 @@ public class Main
         });
         icon = new ImageIcon(Main.class.getResource("/media/logo.png"));
 
-        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+        if(System.getProperty("os.name").toLowerCase().toLowerCase().contains("mac"))
         {
             MacSetup.createMacSettings();
         }
@@ -76,10 +77,15 @@ public class Main
 
     public static void createConsoleGUI()
     {
+        JButton launchJar = Main.mainGUI.launchJar;
+
+        launchJar.setEnabled(false);
+        launchJar.setToolTipText("You can't have more than one console open per instance of Lava Control. If you want to use Lava Control on multiple servers, simply launch the Jar again along side this one.");
+
         consoleFrame = new JFrame("Lava Control | Console");
         System.out.println("[Lava Control] Creating Lava Control's Console GUI...");
 
-        if(System.getProperty("os.name").contains("mac"))
+        if(System.getProperty("os.name").toLowerCase().contains("mac"))
         {
             MacSetup.setCanFullscreenWindow(consoleFrame, true);
         }
@@ -104,7 +110,7 @@ public class Main
         }
         catch (NumberFormatException nfe)
         {
-            // Whatever :(
+            // Tell us we screwed up
         }
 
         mc.setMessageLines(ml);
@@ -127,7 +133,7 @@ public class Main
 
                 menuFrame = new JFrame("Lava Control | Main");
 
-                if(System.getProperty("os.name").contains("mac"))
+                if(System.getProperty("os.name").toLowerCase().contains("mac"))
                 {
                     MacSetup.setCanFullscreenWindow(menuFrame, true);
                 }

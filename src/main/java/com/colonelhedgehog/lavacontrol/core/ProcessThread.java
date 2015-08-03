@@ -35,7 +35,7 @@ public class ProcessThread extends Thread
         while (!Thread.interrupted())
         {
             //input.close();
-            Main.mainGUI.launchJar.setToolTipText("Another instance of your server is running. Be aware, clicking this may fail to bind the port.");
+            //Main.mainGUI.launchJar.setToolTipText("Another instance of your server is running. Be aware, clicking this may fail to bind the port.");
             //System.out.println("Thread begin.");
             try
             {
@@ -84,7 +84,7 @@ public class ProcessThread extends Thread
                     Session session = jsch.getSession(username, host);
                     JSch.setConfig("StrictHostKeyChecking", "no");
                     session.setPassword(password);
-                    session.connect(10000);
+                    session.connect(1000);
 
                     channel = session.openChannel("shell");
                     channel.connect(3000);
@@ -135,6 +135,7 @@ public class ProcessThread extends Thread
 
                     while ((s = stdout.readLine()) != null)
                     {
+                        Main.consoleGUI.determineQueues(s);
                         System.out.println(s);
                     }
 
@@ -166,6 +167,7 @@ public class ProcessThread extends Thread
             }
         }
 
+        Main.consoleGUI.determineQueues("[LavaControl] --Stopped");
         Main.consoleGUI.disableWindow();
         Thread.currentThread().interrupt();
         Main.consoleGUI.consoleThread.interrupt();
