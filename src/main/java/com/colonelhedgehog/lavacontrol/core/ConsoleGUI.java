@@ -5,10 +5,7 @@ import com.colonelhedgehog.lavacontrol.core.components.SmoothJProgressBar;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,21 +20,23 @@ import java.util.List;
 public class ConsoleGUI
 {
 
-    public JPanel ConsolePanel;
-    public JTextField consoleInput;
-    public JTextArea consoleText;
-    public JScrollPane scrollPane;
+    private JPanel ConsolePanel;
+    private JTextField consoleInput;
+    private JTextArea consoleText;
+    private JScrollPane scrollPane;
     private JButton exportLogButton;
     private JButton killButton;
     private JButton stopButton;
-    private JCheckBox stickyScrollbar;
     private JButton sendCommand;
     private SmoothJProgressBar commandProgress;
-    public InputStream in;
-    public BufferedWriter writer;
-    public Thread consoleThread;
+    private JButton searchButton;
+    private InputStream in;
+    private BufferedWriter writer;
+    private Thread consoleThread;
     private int index = -1;
     private List<String> messageHistory = new ArrayList<>();
+    private boolean disabled = false;
+    private boolean nextWillBeError = false;
 
     public ConsoleGUI()
     {
@@ -61,6 +60,7 @@ public class ConsoleGUI
 
         killButton.addActionListener(killListener);
         stopButton.addActionListener(stopListener);
+        searchButton.addActionListener(searchListener);
         exportLogButton.addActionListener(exportLogListener);
         consoleInput.setBorder(new RoundedCornerBorder(6));
         scrollPane.setBorder(new RoundedCornerBorder(6));
@@ -68,7 +68,45 @@ public class ConsoleGUI
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         consoleText.setCaret(caret);
         commandProgress.setValue(0);
+
+        final int mask = Main.isMac() ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
+        KeyStroke killKey = KeyStroke.getKeyStroke(KeyEvent.VK_K, mask);
+        killButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(killKey, "killKey");
+        killButton.getActionMap().put("killKey", buttonAction);
+
+        KeyStroke stopKey = KeyStroke.getKeyStroke(KeyEvent.VK_S, mask);
+        stopButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stopKey, "stopKey");
+        stopButton.getActionMap().put("stopKey", buttonAction);
+
+        KeyStroke findKey = KeyStroke.getKeyStroke(KeyEvent.VK_F, mask);
+        searchButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(findKey, "findKey");
+        searchButton.getActionMap().put("findKey", buttonAction);
+
+        KeyStroke exportKey = KeyStroke.getKeyStroke(KeyEvent.VK_E, mask);
+        exportLogButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(exportKey, "exportKey");
+        exportLogButton.getActionMap().put("exportKey", buttonAction);
+
+        if (Main.getSettings().getStickyScrollBar())
+        {
+            caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        }
+        else
+        {
+            caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        }
+
+        consoleText.setCaret(caret);
     }
+
+    final Action buttonAction = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            JButton source = (JButton) e.getSource();
+            source.doClick();
+        }
+    };
 
     final ActionListener sendListener = new ActionListener()
     {
@@ -76,6 +114,27 @@ public class ConsoleGUI
         public void actionPerformed(ActionEvent e)
         {
             consoleInput.postActionEvent();
+        }
+    };
+
+    final ActionListener searchListener = new ActionListener()
+    {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            if(Main.searchGUI == null)
+            {
+                Main.searchGUI = new SearchGUI();
+                Main.searchDialog = new JDialog(Main.consoleFrame, "Search the console log...");
+                Main.searchDialog.setContentPane(Main.searchGUI.getSearchPanel());
+                Main.searchDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+                Main.searchGUI.getSearchField().setText(Main.searchGUI.getLastSearch());
+            }
+
+            Main.searchDialog.setBounds(0, 0, 450, 110);
+            Main.searchDialog.setResizable(false);
+            Main.searchDialog.setLocationRelativeTo(Main.consoleFrame);
+            Main.searchDialog.setVisible(true);
         }
     };
 
@@ -88,9 +147,9 @@ public class ConsoleGUI
             System.out.println("[Lava Control] If possible, stop the server using the \"stop\" command/button to prevent issues.");
             consoleThread.interrupt();
 
-            if (Main.mainGUI.p != null)
+            if (Main.mainGUI.getProcess() != null)
             {
-                Main.mainGUI.p.destroy();
+                Main.mainGUI.getProcess().destroy();
             }
         }
     };
@@ -178,28 +237,11 @@ public class ConsoleGUI
         consoleThread.start();
         //DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
         //caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);*/
-        stickyScrollbar.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
-                if (((JCheckBox) e.getSource()).isSelected())
-                {
-                    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                }
-                else
-                {
-                    caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-                }
-
-                consoleText.setCaret(caret);
-            }
-        });
     }
 
     public void disableWindow()
     {
+        disabled = true;
         consoleInput.setText("Server stopped.");
         consoleInput.setEnabled(false);
         stopButton.setEnabled(false);
@@ -208,16 +250,28 @@ public class ConsoleGUI
         commandProgress.setIndeterminate(false);
         commandProgress.setValue(0);
 
-        JButton launchJar = Main.mainGUI.launchJar;
-        launchJar.setEnabled(true);
-        launchJar.setToolTipText("");
+
+        Main.mainGUI.getLaunchJar().setEnabled(true);
+        Main.mainGUI.getLaunchJar().setToolTipText("");
+        nextWillBeError = false;
+        ServerStatic.serverInitialized = false;
+
+        if(Main.settings.getCloseWindowOnStop())
+        {
+            Main.consoleFrame.setVisible(false);
+        }
     }
 
     private double factor = 0;
 
+
+
     public void determineQueues(String str)
     {
+        ErrorDetection.determineErrorQueues(str);
+
         String info = "\\[\\d+:\\d+:\\d+\\ INFO]: ";
+        String error = "\\[\\d+:\\d+:\\d+\\ ERROR]: ";
 
         if (!ServerStatic.serverInitialized)
         {
@@ -225,6 +279,7 @@ public class ConsoleGUI
             if(str.matches("\\[(\\w+)\\] Loading (\\w+) v/"))
             {
                 ServerStatic.loadedPlugins++;
+                return;
             }
 
             // Standard status stuff
@@ -232,21 +287,25 @@ public class ConsoleGUI
             if (str.matches("Loading libraries, please wait..."))
             {
                 commandProgress.setValue(100 * 10);
+                return;
             }
 
             if (str.matches(info + "Starting minecraft server version \\d+.\\d+.\\d+"))
             {
                 commandProgress.setValue(100 * 25);
+                return;
             }
 
             if (str.matches(info + "Default game type: (\\w+)"))
             {
                 commandProgress.setValue(100 * 60);
+                return;
             }
 
             if (str.matches(info + "Starting Minecraft server on \\*\\:\\d+"))
             {
                 commandProgress.setValue(100 * 80);
+                return;
             }
 
             if(commandProgress.getValue() < 100)
@@ -254,6 +313,7 @@ public class ConsoleGUI
                 if ((str.startsWith("[Multiverse\\-Core] Loading World & Settings - ") || str.matches(info + "\\-\\-\\-\\-\\-\\-\\-\\- World Settings For \\[([^)]+)\\] \\-\\-\\-\\-\\-\\-\\-\\-")))
                 {
                     commandProgress.setValue(100 * commandProgress.getValue() + 1); // lol, if you have 20 worlds...
+                    return;
                 }
 
                 if(str.matches("\\[(\\w+)\\] Enabling (\\w+) v"))
@@ -270,11 +330,13 @@ public class ConsoleGUI
                         {
                             factor = -1;
                         }
+                        return;
                     }
 
                     if(factor != -1)
                     {
                         commandProgress.setValue((int) ((commandProgress.getValue() + factor) * 100));
+                        return;
                     }
                 }
             }
@@ -286,5 +348,60 @@ public class ConsoleGUI
                 ServerStatic.serverInitialized = true;
             }
         }
+    }
+
+    public JPanel getConsolePanel()
+    {
+        return ConsolePanel;
+    }
+
+    public JTextField getConsoleInput()
+    {
+        return consoleInput;
+    }
+
+    public JTextArea getConsoleText()
+    {
+        return consoleText;
+    }
+
+    public Thread getConsoleThread()
+    {
+        return consoleThread;
+    }
+
+    public JButton getExportLogButton()
+    {
+        return exportLogButton;
+    }
+
+    public JScrollPane getScrollPane()
+    {
+        return scrollPane;
+    }
+
+    public boolean getNextWillBeError()
+    {
+        return nextWillBeError;
+    }
+
+    public void setNextWillBeError(boolean nextWillBeError)
+    {
+        this.nextWillBeError = nextWillBeError;
+    }
+
+    public boolean getDisabled()
+    {
+        return disabled;
+    }
+
+    public JButton getSearchButton()
+    {
+        return searchButton;
+    }
+
+    private void createUIComponents()
+    {
+        // TODO: place custom component creation code here
     }
 }

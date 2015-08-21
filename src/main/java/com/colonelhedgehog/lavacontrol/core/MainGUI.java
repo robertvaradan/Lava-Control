@@ -4,6 +4,7 @@ import com.colonelhedgehog.lavacontrol.core.components.JCheckBoxList;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.swing.*;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -19,28 +20,22 @@ import java.lang.management.ManagementFactory;
  */
 public class MainGUI
 {
-    public JFrame frame;
-    public JTextField jarPath;
-    public JButton chooseJar;
-    public JPanel MainPanel;
-    public JTextField memoryBash;
-    public JButton launchJar;
-    //public JList cList;
-    public JScrollPane pluginList;
-    public JTextField maxConsoleLines;
-    public JCheckBox sshEnabled;
-    public JTextField sshUsername;
-    public JTextField sshHost;
-    public JPasswordField sshPassword;
-    public JLabel passwordLabel;
+    private JFrame frame;
+    private JTextField jarPath;
+    private JButton chooseJar;
+    private JPanel MainPanel;
+    private JButton launchJar;
+    //private JList cList;
+    private JScrollPane pluginList;
+    private JButton optionsButton;
 
-    public Process p;
-    public ProcessBuilder pb;
-    public ProcessThread thread;
-    public JCheckBoxList checkList;
+    private Process process;
+    private ProcessBuilder pb;
+    private JCheckBoxList checkList;
 
     public MainGUI()
     {
+        jarPath.setText(Main.getSettings().getLastPath());
         launchJar.setActionCommand("Launch");
         launchJar.addActionListener(new ActionListener()
         {
@@ -67,36 +62,15 @@ public class MainGUI
             }
         });
 
-        disableSSH();
-
-        sshEnabled.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                sshUsername.setEnabled(sshEnabled.isSelected());
-                sshHost.setEnabled(sshEnabled.isSelected());
-                sshPassword.setEnabled(sshEnabled.isSelected());
-                passwordLabel.setEnabled(sshEnabled.isSelected());
-                chooseJar.setEnabled(!sshEnabled.isSelected());
-                pluginList.setEnabled(!sshEnabled.isSelected());
-
-                if(checkList != null)
-                {
-                    checkList.setEnabled(!sshEnabled.isSelected());
-                }
-            }
-        });
-
         jarPath.addActionListener(new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if(!sshEnabled.isSelected())
+                if (!Main.getSettings().getSSHEnabled())
                 {
                     File chosen = new File(jarPath.getText());
-                    ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
+                    ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
 
                     if (chosen.exists())
                     {
@@ -106,7 +80,7 @@ public class MainGUI
                             JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
                             return;
                         }
-                        Main.mainGUI.jarPath.setText(apath);
+                        jarPath.setText(apath);
                         Main.listJars(new File(new File(apath).getParent() + "/plugins"));
                     }
                     else
@@ -116,53 +90,46 @@ public class MainGUI
                 }
             }
         });
-    }
 
-    private void disableSSH()
-    {
-        sshEnabled.setEnabled(false);
-        sshEnabled.setSelected(false);
-        sshEnabled.setToolTipText("SSH connections are currently unsupported.");
+        optionsButton.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                Main.createPrefsGUI();
+            }
+        });
     }
 
     public void launch()
     {
         Main.createConsoleGUI();
 
-        ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
+        ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
         final File jar = new File(jarPath.getText());
-        if(!jar.exists() && !sshEnabled.isSelected())
+        if (!jar.exists() && !Main.getSettings().getSSHEnabled())
         {
             JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" doesn't exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
 
-        if(!jar.getName().endsWith(".jar"))
+        if (!jar.getName().endsWith(".jar"))
         {
             JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" isn't a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
 
-        int mem;
+        int mem = Main.getSettings().getMemBash();
 
-        try
-        {
-            mem = Integer.parseInt(memoryBash.getText());
-        }
-        catch (NumberFormatException nfe)
-        {
-            JOptionPane.showMessageDialog(frame, "ERROR: The memory argument \"" + memoryBash.getText() + "\" must be an integer.", "Invalid Memory Specified", JOptionPane.INFORMATION_MESSAGE, scaled);
-            return;
-        }
 
         long maxMemory = ((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean()).getFreePhysicalMemorySize();
 
-        if(mem < 8)
+        if (mem < 8)
         {
             JOptionPane.showMessageDialog(frame, "ERROR: Too little memory specified! You must put at least 8 megabytes. (512 recommended!)", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
             return;
         }
-        if(maxMemory < 512)
+        if (maxMemory < 512)
         {
             int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
             if (selected == JOptionPane.YES_OPTION)
@@ -174,10 +141,10 @@ public class MainGUI
                 return;
             }
         }
-        if(maxMemory < mem)
+        if (maxMemory < mem)
         {
             int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
-            if(selected == JOptionPane.YES_OPTION)
+            if (selected == JOptionPane.YES_OPTION)
             {
                 System.out.println("[Lava Control] *Gulp* Here goes... running with " + (maxMemory - mem) + " more megabytes memory than I have available.");
             }
@@ -188,12 +155,12 @@ public class MainGUI
         }
 
         //Runtime rt = Runtime.getRuntime();
-        if(!sshEnabled.isSelected())
+        if (!Main.getSettings().getSSHEnabled())
         {
             createShellFile(jar.getParentFile());
         }
 
-        thread = new ProcessThread(jar.getAbsolutePath(), jarPath, mem, sshEnabled.isSelected());
+        ProcessThread thread = new ProcessThread(jar.getAbsolutePath(), jarPath, mem, Main.getSettings().getSSHEnabled());
 
         thread.start();
     }
@@ -202,13 +169,13 @@ public class MainGUI
     {
         File path = new File(fi.getPath());
 
-        if(!path.exists())
+        if (!path.exists())
         {
             path.mkdirs();
         }
 
         File f = new File(path + "/lavacontrol_launch.sh");
-        if(f.exists())
+        if (f.exists())
         {
             f.delete();
         }
@@ -218,7 +185,7 @@ public class MainGUI
             f.createNewFile();
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
             bw.write("cd \"$( dirname \"$0\" )\"\n");
-            bw.write("java " + (!System.getProperty("java.version").startsWith("1.8") ? "-XX:MaxPermSize=128M" : "") + " -Xmx" + memoryBash.getText() + "M -jar " + new File(jarPath.getText()).getName() + " -o true");
+            bw.write("java " + (!System.getProperty("java.version").startsWith("1.8") ? "-XX:MaxPermSize=128M" : "") + " -Xmx" + Main.getSettings().getMemBash() + "M -jar " + new File(jarPath.getText()).getName() + " -o true");
             bw.flush();
             bw.close();
         }
@@ -244,5 +211,51 @@ public class MainGUI
 
     public void createUIComponents()
     {
+    }
+
+    public JTextField getJarPath()
+    {
+        return jarPath;
+    }
+
+
+    public JButton getChooseJar()
+    {
+        return this.chooseJar;
+    }
+
+    public JScrollPane getPluginList()
+    {
+        return this.pluginList;
+    }
+
+    public JCheckBoxList getCheckList()
+    {
+        return this.checkList;
+    }
+
+    public void setChecklist(JCheckBoxList checkList)
+    {
+        this.checkList = checkList;
+    }
+
+    public JPanel getMainPanel()
+    {
+        return this.MainPanel;
+    }
+
+    public JButton getLaunchJar()
+    {
+        return this.launchJar;
+    }
+
+    public Process getProcess()
+    {
+        return this.process;
+    }
+
+    public void setProcess(Process process)
+    {
+        this.process = process;
     }
 }

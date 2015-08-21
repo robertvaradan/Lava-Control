@@ -219,7 +219,7 @@ public class MessageConsole
             isFirstLine = false;
             String line = buffer.toString();
 
-            JScrollPane scrollPane = Main.consoleGUI.scrollPane;
+            JScrollPane scrollPane = Main.consoleGUI.getScrollPane();
             try
             {
                 if (isAppend)

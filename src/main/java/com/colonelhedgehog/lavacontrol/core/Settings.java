@@ -10,10 +10,17 @@ import java.io.*;
  */
 public class Settings
 {
-    public enum Field
-    {
-        MEM_BASH, MAX_CONSOLE_LINES, SSH_ENABLED, SSH_USERNAME, SSH_PASSWORD, SSH_HOST, LAST_PATH
-    }
+    private int memBash;
+    private int maxConsoleLines;
+    private boolean sshEnabled;
+    private String sshUsername;
+    private String sshPassword;
+    private String sshHost;
+    private String lastPath;
+
+    private boolean stickyScrollBar;
+    private boolean closeWindowOnStop;
+    private boolean askExportLog;
 
     public Settings()
     {
@@ -48,31 +55,17 @@ public class Settings
         try
         {
             bw = new BufferedWriter(new FileWriter(f));
-            int bash = 0;
 
-            try
-            {
-                bash = Integer.parseInt(Main.mainGUI.memoryBash.getText());
-            }
-            catch (NumberFormatException nfe)
-            {
-
-            }
-
-            bw.write("$memory = " + bash);
-            bw.write("\n$path = " + Main.mainGUI.jarPath.getText());
-            bw.write("\n$maxconsolelines = " + Main.mainGUI.maxConsoleLines.getText());
-            bw.write("\n$sshenabled = " + Main.mainGUI.sshEnabled.isSelected());
-            bw.write("\n$sshusername = " + Main.mainGUI.sshUsername.getText());
-            bw.write("\n$sshhost = " + Main.mainGUI.sshHost.getText());
-            String p = "";
-
-            for(char c : Main.mainGUI.sshPassword.getPassword())
-            {
-                p += c;
-            }
-
-            bw.write("\n$sshpassword = " + p);
+            bw.write("$memory = " + memBash);
+            bw.write("\n$path = " + lastPath);
+            bw.write("\n$maxconsolelines = " + maxConsoleLines);
+            bw.write("\n$sshenabled = " + sshEnabled);
+            bw.write("\n$sshusername = " + sshUsername);
+            bw.write("\n$sshhost = " + sshHost);
+            bw.write("\n$stickyscrollbar = " + stickyScrollBar);
+            bw.write("\n$closewindowonstop = " + closeWindowOnStop);
+            bw.write("\n$askexportlog = " + askExportLog);
+            bw.write("\n$sshpassword = " + Main.getSettings().getSSHPassword());
 
             bw.flush();
             bw.close();
@@ -84,15 +77,18 @@ public class Settings
         }
     }
 
-    public Object getField(Field fi)
+    public void reloadSettings()
     {
-        int mem = 512;
-        String path = "/";
-        int maxConsoleLines = 100;
-        String sshUsername = "Username";
-        String sshHost = "Host";
-        String sshPassword = "";
-        boolean sshEnabled = false;
+        memBash = 512;
+        maxConsoleLines = 100;
+        sshUsername = "Username";
+        sshHost = "Host";
+        sshPassword= "";
+        sshEnabled = false;
+        lastPath = "/";
+        stickyScrollBar = true;
+        closeWindowOnStop = false;
+        askExportLog = true;
 
         File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
         if (f.exists())
@@ -107,16 +103,12 @@ public class Settings
                     {
                         try
                         {
-                            mem = Integer.parseInt(line.replace("$memory = ", ""));
+                            memBash = Integer.parseInt(line.replace("$memory = ", ""));
                         }
                         catch(NumberFormatException nfe)
                         {
                             System.out.println("[Lava Control] Strange error occurred. $memory was not an integer. Reverting to defaults.");
                         }
-                    }
-                    else if(line.startsWith("$path = "))
-                    {
-                        path = line.replace("$path = ", "");
                     }
                     else if (line.startsWith("$maxconsolelines = "))
                     {
@@ -138,6 +130,26 @@ public class Settings
                     {
                         sshHost = line.replace("$sshhost = ", "");
                     }
+                    else if (line.startsWith("$sshhost = "))
+                    {
+                        sshHost = line.replace("$sshhost = ", "");
+                    }
+                    else if(line.startsWith("$path = "))
+                    {
+                        lastPath = line.replace("$path = ", "");
+                    }
+                    else if(line.startsWith("$stickyscrollbar = "))
+                    {
+                        stickyScrollBar = Boolean.parseBoolean(line.replace("$stickyscrollbar = ", ""));
+                    }
+                    else if(line.startsWith("$closewindowonstop = "))
+                    {
+                        closeWindowOnStop = Boolean.parseBoolean(line.replace("$closewindowonstop = ", ""));
+                    }
+                    else if(line.startsWith("$askexportlog = "))
+                    {
+                        askExportLog = Boolean.parseBoolean(line.replace("$askexportlog = ", ""));
+                    }
                 }
             }
             catch (IOException e)
@@ -145,38 +157,117 @@ public class Settings
                 e.printStackTrace();
             }
         }
+    }
 
-        if(fi == Field.MEM_BASH)
+    public int getMemBash()
+    {
+        return memBash;
+    }
+
+    public int getMaxConsoleLines()
+    {
+        return maxConsoleLines;
+    }
+
+    public boolean getSSHEnabled()
+    {
+        return sshEnabled;
+    }
+
+    public String getSSHUsername()
+    {
+        return sshUsername;
+    }
+
+    public String getSSHPassword()
+    {
+        return sshPassword;
+    }
+
+    public String getSSHHost()
+    {
+        return sshHost;
+    }
+
+    public String getLastPath()
+    {
+        return lastPath;
+    }
+
+    public boolean getStickyScrollBar()
+    {
+        return stickyScrollBar;
+    }
+
+    public boolean getCloseWindowOnStop()
+    {
+        return closeWindowOnStop;
+    }
+
+    public boolean getAskExportLog()
+    {
+        return askExportLog;
+    }
+
+    public void setMemBash(int memBash)
+    {
+        this.memBash = memBash;
+    }
+
+    public void setMaxConsoleLines(int maxConsoleLines)
+    {
+        this.maxConsoleLines = maxConsoleLines;
+    }
+
+    public void setSSHEnabled(boolean sshEnabled)
+    {
+        this.sshEnabled = sshEnabled;
+    }
+
+    public void setSSHUsername(String username)
+    {
+        this.memBash = memBash;
+    }
+
+    public void setSSHPassword(String sshPassword)
+    {
+        this.sshPassword = sshPassword;
+    }
+
+    public void setSSHHost(String sshHost)
+    {
+        this.sshHost = sshHost;
+    }
+
+    public void setLastPath(String lastPath)
+    {
+        this.lastPath = lastPath;
+    }
+
+    public void setStickyScrollBar(boolean stickyScrollBar)
+    {
+        this.stickyScrollBar = stickyScrollBar;
+    }
+
+    public void setCloseWindowOnStop(boolean closeWindowOnStop)
+    {
+        this.closeWindowOnStop = closeWindowOnStop;
+    }
+
+    public void setAskExportLog(boolean askExportLog)
+    {
+        this.askExportLog = askExportLog;
+    }
+
+    public void deleteSettings()
+    {
+        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
+
+        if(f.exists())
         {
-            return mem;
+            f.delete();
         }
-        else if(fi == Field.LAST_PATH)
-        {
-            return path;
-        }
-        else if (fi == Field.MAX_CONSOLE_LINES)
-        {
-            return maxConsoleLines;
-        }
-        else if (fi == Field.SSH_ENABLED)
-        {
-            return sshEnabled;
-        }
-        else if (fi == Field.SSH_USERNAME)
-        {
-            return sshUsername;
-        }
-        else if (fi == Field.SSH_PASSWORD)
-        {
-            return sshPassword;
-        }
-        else if (fi == Field.SSH_HOST)
-        {
-            return sshHost;
-        }
-        else
-        {
-            return null;
-        }
+
+        reloadSettings();
     }
 }

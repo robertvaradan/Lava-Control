@@ -1,7 +1,6 @@
 package com.colonelhedgehog.lavacontrol.core.components;
 
 import javax.swing.*;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -17,6 +16,7 @@ public class SmoothJProgressBar extends JProgressBar
     @Override
     public void setValue(final int destValue)
     {
+        //System.out.println("Going to value: " + destValue);
         if(currentFuture != null)
         {
             currentFuture.cancel(true);
@@ -36,15 +36,27 @@ public class SmoothJProgressBar extends JProgressBar
         final Runnable runnable = new Runnable()
         {
             private int iteration = 0;
+            private int easeOut = 0;
             public void run()
             {
-                iteration += distance/20;
+                iteration += distance/50;
 
                 if (currentValue[0] < destValue)
                 {
                     double newValue = iteration;
 
+                    if(currentValue[0] / destValue >= 0.85)
+                    {
+                        easeOut++;
+                        int easeValue = (int) (Math.pow(easeOut * 2, 2));
+                        newValue -= easeValue;
+                        //System.out.println("NOW: Easing out -" + easeValue);
+                    }
+
                     int finalValue = currentValue[0] += newValue;
+
+                    //int easeOut = 0;
+
                     superSetValue(finalValue > destValue ? destValue : finalValue);
                     //System.out.println("Debug: Iterating: " + finalValue + "/" + destValue);
                 }

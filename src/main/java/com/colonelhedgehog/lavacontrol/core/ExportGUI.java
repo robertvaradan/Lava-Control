@@ -22,34 +22,55 @@ public class ExportGUI
     {
         fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fc.setMultiSelectionEnabled(false);
-        int result = fc.showOpenDialog(FilePanel);
+        final int result = fc.showOpenDialog(FilePanel);
 
-        if (result == JFileChooser.APPROVE_OPTION)
+        final Thread[] exporthread = {null};
+        exporthread[0] = new Thread(new Runnable()
         {
-            File chosen = fc.getSelectedFile().isDirectory() ? fc.getSelectedFile() : fc.getSelectedFile().getParentFile();
-            Date date = new Date(System.currentTimeMillis());
-            SimpleDateFormat df2 = new SimpleDateFormat("dd-MM-yy_HH-mm-ss");
-            String dateText = df2.format(date);
-
-            File log = new File(chosen + "/LavaControl_" + dateText + ".log");
-
-            try
+            @Override
+            public void run()
             {
-                BufferedWriter bw = new BufferedWriter(new FileWriter(log));
-                for (String line : Main.consoleGUI.consoleText.getText().split("\n"))
+
+                if (result == JFileChooser.APPROVE_OPTION)
                 {
-                    bw.write(line + "\n");
+                    File chosen = fc.getSelectedFile().isDirectory() ? fc.getSelectedFile() : fc.getSelectedFile().getParentFile();
+                    Date date = new Date(System.currentTimeMillis());
+                    SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy_HH.mm.ss");
+                    String dateText = df2.format(date);
+
+                    File log = new File(chosen + "/LavaControl_" + dateText + ".log");
+
+                    try
+                    {
+                        BufferedWriter bw = new BufferedWriter(new FileWriter(log));
+                        for (String line : Main.consoleGUI.getConsoleText().getText().split("\n"))
+                        {
+                            bw.write(line + "\n");
+                        }
+
+                        bw.flush();
+                        bw.close();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    JOptionPane.showMessageDialog(Main.consoleFrame, "The log \"LavaControl_" + dateText + "\" has been successfully saved!");
+
+                    try
+                    {
+                        exporthread[0].join();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        exporthread[0].interrupt();
+                        //e.printStackTrace();
+                    }
                 }
-
-                bw.flush();
-                bw.close();
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+        });
 
-            JOptionPane.showMessageDialog(Main.consoleFrame, "The log \"LavaControl_" + dateText + "\" has been successfully saved!");
-        }
+        exporthread[0].start();
     }
 }

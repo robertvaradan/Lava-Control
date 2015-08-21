@@ -6,18 +6,24 @@ import com.colonelhedgehog.lavacontrol.core.system.mac.MacSetup;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 
 public class Main
 {
 
     private static ImageIcon icon;
+    public static PrefsGUI prefsGUI;
+    public static JDialog prefsFrame;
 
     public static void main(String[] args)
     {
+        settings = new Settings();
+        settings.reloadSettings();
         System.out.println("[Lava Control] Loading...");
 
-        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+        if(isMac())
         {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Lava Control");
@@ -40,13 +46,13 @@ public class Main
             public void run()
             {
                 settings.saveSettings();
-                if (mainGUI.p != null && consoleGUI.consoleThread.isAlive())
+                if (mainGUI.getProcess() != null && consoleGUI.getConsoleThread().isAlive())
                 {
-                    mainGUI.p.destroy();
+                    mainGUI.getProcess().destroy();
                 }
-                else if(consoleGUI.consoleThread.isAlive())
+                else if (consoleGUI != null && consoleGUI.getConsoleThread().isAlive())
                 {
-                    consoleGUI.consoleThread.interrupt();
+                    consoleGUI.getConsoleThread().interrupt();
                 }
             }
         });
@@ -58,61 +64,115 @@ public class Main
                 createMainGUI();
             }
         });
+
         icon = new ImageIcon(Main.class.getResource("/media/logo.png"));
 
         if(System.getProperty("os.name").toLowerCase().toLowerCase().contains("mac"))
         {
             MacSetup.createMacSettings();
         }
-
     }
 
     public static JFrame menuFrame;
     public static JFrame consoleFrame;
+    public static JDialog searchDialog;
 
     public static MainGUI mainGUI = null;
     public static FileGUI fileGUI = null;
+    public static SearchGUI searchGUI = null;
     public static ConsoleGUI consoleGUI = null;
     public static Settings settings;
 
     public static void createConsoleGUI()
     {
-        JButton launchJar = Main.mainGUI.launchJar;
-
+        JButton launchJar = Main.mainGUI.getLaunchJar();
         launchJar.setEnabled(false);
-        launchJar.setToolTipText("You can't have more than one console open per instance of Lava Control. If you want to use Lava Control on multiple servers, simply launch the Jar again along side this one.");
+        launchJar.setToolTipText("You can't have more than one console open per instance of Lava Control. If you want to use Lava Control on multiple servers, simply launch this Lava Control Jar again along side this one.");
 
         consoleFrame = new JFrame("Lava Control | Console");
         System.out.println("[Lava Control] Creating Lava Control's Console GUI...");
 
-        if(System.getProperty("os.name").toLowerCase().contains("mac"))
+        if(isMac())
         {
             MacSetup.setCanFullscreenWindow(consoleFrame, true);
         }
 
         consoleGUI = new ConsoleGUI();
 
-        consoleFrame.setContentPane(consoleGUI.ConsolePanel);
+
+        final ImageIcon scaled = new ImageIcon(getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
+
+        consoleFrame.setContentPane(consoleGUI.getConsolePanel());
         consoleFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        consoleFrame.setBounds(0, 0, 800, 600);
+        consoleFrame.setBounds(0, 0, 900, 600);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         consoleFrame.setLocation(dim.width / 2 - consoleFrame.getSize().width / 2, dim.height / 2 - consoleFrame.getSize().height / 2);
         consoleFrame.setVisible(true);
+        consoleFrame.addWindowListener(new WindowListener()
+        {
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
 
-        MessageConsole mc = new MessageConsole(consoleGUI.consoleText);
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                if(settings.getAskExportLog())
+                {
+                    File cPath = new File(mainGUI.getJarPath().getText());
+                    int result = JOptionPane.showConfirmDialog(consoleFrame, "Do you want to save your Lava Control log before exiting?" +
+                            "\nThe contents of the console will be cleared if you do not." +
+                            "\n(Your server-generated logs were automatically saved to: " +
+                            "\n\"" + cPath.getParentFile().getAbsolutePath() + "/logs\")", "Do you want to save your Lava Control log before exiting?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
+
+                    if (result == JOptionPane.YES_OPTION)
+                    {
+                        consoleGUI.getExportLogButton().doClick();
+                    }
+                    else
+                    {
+                        e.getWindow().setVisible(false);
+                    }
+                }
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e)
+            {
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e)
+            {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e)
+            {
+
+            }
+        });
+
+        MessageConsole mc = new MessageConsole(consoleGUI.getConsoleText());
         mc.redirectOut();
         mc.redirectErr(Color.RED, null);
-        int ml = 100;
 
-        try
-        {
-            ml = Integer.parseInt(mainGUI.maxConsoleLines.getText());
-        }
-        catch (NumberFormatException nfe)
-        {
-            // Tell us we screwed up
-        }
-
+        int ml = Main.getSettings().getMaxConsoleLines();
         mc.setMessageLines(ml);
     }
 
@@ -128,12 +188,9 @@ public class Main
             public void run()
             {
 
-
-                settings = new Settings();
-
                 menuFrame = new JFrame("Lava Control | Main");
 
-                if(System.getProperty("os.name").toLowerCase().contains("mac"))
+                if(isMac())
                 {
                     MacSetup.setCanFullscreenWindow(menuFrame, true);
                 }
@@ -145,53 +202,27 @@ public class Main
                     mainGUI = new MainGUI();
                 }
 
-                menuFrame.setContentPane(mainGUI.MainPanel);
+                JPanel mainPanel = mainGUI.getMainPanel();
+                menuFrame.setContentPane(mainPanel);
                 menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-                menuFrame.setBounds(0, 0, 800, 600);
+                menuFrame.setBounds(0, 0, 900, 600);
                 Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
                 menuFrame.setLocation(dim.width / 2 - menuFrame.getSize().width / 2 - 10, dim.height / 2 - menuFrame.getSize().height / 2 - 10);
                 menuFrame.setVisible(true);
                 System.out.println("[Lava Control] Created Lava Control's GUI.");
 
-                mainGUI.jarPath.setText(settings.getField(Settings.Field.LAST_PATH).toString());
-                mainGUI.memoryBash.setText(settings.getField(Settings.Field.MEM_BASH).toString());
-                mainGUI.maxConsoleLines.setText(settings.getField(Settings.Field.MAX_CONSOLE_LINES).toString());
-                mainGUI.sshEnabled.setSelected(Boolean.parseBoolean(settings.getField(Settings.Field.SSH_ENABLED).toString()));
-                mainGUI.sshHost.setText(settings.getField(Settings.Field.SSH_HOST).toString());
-                mainGUI.sshUsername.setText(settings.getField(Settings.Field.SSH_USERNAME).toString());
-                mainGUI.sshPassword.setText(settings.getField(Settings.Field.SSH_PASSWORD).toString());
-
-                boolean se = mainGUI.sshEnabled.isSelected();
-
-                mainGUI.sshUsername.setEnabled(se);
-                mainGUI.sshPassword.setEnabled(se);
-                mainGUI.sshHost.setEnabled(se);
-                mainGUI.passwordLabel.setEnabled(se);
-                mainGUI.chooseJar.setEnabled(!se);
-                mainGUI.pluginList.setEnabled(!se);
-
-                if (mainGUI.checkList != null)
-                {
-                    mainGUI.checkList.setEnabled(!se);
-                    mainGUI.checkList.setBorder(new RoundedCornerBorder(6));
-                }
-
                 mainGUI.createUIComponents();
-                listJars(new File(new File(settings.getField(Settings.Field.LAST_PATH).toString()).getParent() + "/plugins"));
-                mainGUI.pluginList.scrollRectToVisible(new Rectangle(mainGUI.pluginList.getSize()));
-                mainGUI.pluginList.setMinimumSize(mainGUI.pluginList.getSize());
-                mainGUI.pluginList.setPreferredSize(mainGUI.pluginList.getSize());
-                mainGUI.pluginList.setMaximumSize(mainGUI.pluginList.getSize());
-                mainGUI.pluginList.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+                listJars(new File(new File(Main.getSettings().getLastPath()).getParent() + "/plugins"));
+                mainGUI.getPluginList().scrollRectToVisible(new Rectangle(mainGUI.getPluginList().getSize()));
+                mainGUI.getPluginList().setMinimumSize(mainGUI.getPluginList().getSize());
+                mainGUI.getPluginList().setPreferredSize(mainGUI.getPluginList().getSize());
+                mainGUI.getPluginList().setMaximumSize(mainGUI.getPluginList().getSize());
+                mainGUI.getPluginList().getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
 
-                mainGUI.jarPath.setBorder(new RoundedCornerBorder(6));
-                mainGUI.pluginList.setBorder(new RoundedCornerBorder(6));
+                mainGUI.getJarPath().setBorder(new RoundedCornerBorder(6));
+                mainGUI.getPluginList().setBorder(new RoundedCornerBorder(6));
 
-                mainGUI.memoryBash.setBorder(new RoundedCornerBorder(6));
-                mainGUI.sshUsername.setBorder(new RoundedCornerBorder(6));
-                mainGUI.sshHost.setBorder(new RoundedCornerBorder(6));
-                mainGUI.sshPassword.setBorder(new RoundedCornerBorder(6));
-                mainGUI.maxConsoleLines.setBorder(new RoundedCornerBorder(6));
+
             }
         });
         uithread.start();
@@ -199,19 +230,19 @@ public class Main
 
     public static void listJars(File f)
     {
-        if (mainGUI.sshEnabled.isSelected())
+        if (Main.getSettings().getSSHEnabled())
         {
             return;
         }
 
         JCheckBox firstBox = null;
         DefaultListModel<JCheckBox> model = new DefaultListModel<>();
-        if (mainGUI.checkList != null)
+        if (mainGUI.getCheckList() != null)
         {
             //System.out.println("Already exists lol: " + mainGUI.checkList.getName());
-            mainGUI.pluginList.remove(mainGUI.checkList);
+            mainGUI.getPluginList().remove(mainGUI.getCheckList());
         }
-        //mainGUI.pluginList.repaint();
+        //mainGUI.getPluginList().repaint();
 
         File[] files = new File(f.getPath()).listFiles();
         if (files != null)
@@ -231,24 +262,49 @@ public class Main
                     cb.setVisible(true);
                     cb.setText(file.getName());
                     model.addElement(cb);
-                    mainGUI.pluginList.validate();
-                    mainGUI.pluginList.repaint();
+                    mainGUI.getPluginList().validate();
+                    mainGUI.getPluginList().repaint();
                 }
             }
         }
 
-        JCheckBoxList jCheckBoxList = new JCheckBoxList(model, mainGUI.jarPath.getText());
+        JCheckBoxList jCheckBoxList = new JCheckBoxList(model, mainGUI.getJarPath().getText());
         jCheckBoxList.setName("pluginCheckboxList");
-        jCheckBoxList.setSize(mainGUI.pluginList.getSize());
-        mainGUI.pluginList.add(jCheckBoxList);
-        mainGUI.checkList = jCheckBoxList;
-        mainGUI.pluginList.setViewportView(mainGUI.checkList);
+        jCheckBoxList.setSize(mainGUI.getPluginList().getSize());
+        mainGUI.getPluginList().add(jCheckBoxList);
+        mainGUI.setChecklist(jCheckBoxList);
+        mainGUI.getPluginList().setViewportView(mainGUI.getCheckList());
         //jCheckBoxList.setVisible(true);
+    }
+
+    public static void createPrefsGUI()
+    {
+        settings.reloadSettings();
+
+        prefsGUI = new PrefsGUI();
+        prefsFrame = new JDialog(menuFrame, "Lava Control | Options");
+        prefsFrame.setContentPane(prefsGUI.getPrefsPanel());
+        prefsFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        prefsFrame.setResizable(false);
+        prefsFrame.setBounds(0, 0, 680, 300);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        prefsFrame.setLocation(dim.width / 2 - prefsFrame.getSize().width / 2 - 10, dim.height / 2 - prefsFrame.getSize().height / 2 - 10);
+        prefsFrame.setVisible(true);
     }
 
     public static void createFileGUI()
     {
         System.out.println("[Lava Control] Creating Lava Control's File Chooser GUI...");
         fileGUI = new FileGUI();
+    }
+
+    public static boolean isMac()
+    {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    public static Settings getSettings()
+    {
+        return settings;
     }
 }

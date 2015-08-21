@@ -10,14 +10,13 @@ import java.io.File;
  */
 public class FileGUI
 {
-    public JPanel FilePanel;
-    public JFileChooser fc;
+    private JPanel FilePanel;
 
     public FileGUI()
     {
-        fc = new JFileChooser();
+        JFileChooser fc = new JFileChooser();
 
-        File file = new File(Main.mainGUI.jarPath.getText());
+        File file = new File(Main.mainGUI.getJarPath().getText());
 
         if (file.exists())
         {
@@ -42,7 +41,7 @@ public class FileGUI
                     JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.");
                     return;
                 }
-                Main.mainGUI.jarPath.setText(apath);
+                Main.mainGUI.getJarPath().setText(apath);
                 Main.listJars(new File(new File(apath).getParent() + "/plugins"));
             }
         }

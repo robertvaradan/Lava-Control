@@ -11,8 +11,8 @@ import java.io.*;
  */
 public class ProcessThread extends Thread
 {
-    public ProcessBuilder pb;
-    public Process p;
+    private ProcessBuilder pb;
+    private Process p;
     private JTextField jarPath;
     private String file;
     private int mem;
@@ -44,34 +44,28 @@ public class ProcessThread extends Thread
                 String[] commands;
                 if (System.getProperty("java.version").startsWith("1.8"))
                 {
-                    commands = new String[]{"java", "-Xmx" + Main.mainGUI.memoryBash.getText() + "M", "-jar", new File(Main.mainGUI.jarPath.getText()).getName().replace(" ", "\\ "), "-o true"};
+                    commands = new String[]{"java", "-Xmx" + Main.getSettings().getMemBash() + "M", "-jar", new File(Main.mainGUI.getJarPath().getText()).getName().replace(" ", "\\ "), "-o true"};
                 }
                 else
                 {
-                    commands = new String[]{"java", "-XX:MaxPermSize=128M", "-Xmx" + Main.mainGUI.memoryBash.getText() + "M", "-jar", new File(Main.mainGUI.jarPath.getText()).getName().replace(" ", "\\ "), "-o true"};
+                    commands = new String[]{"java", "-XX:MaxPermSize=128M", "-Xmx" + Main.prefsGUI.getMemoryBash() + "M", "-jar", new File(Main.mainGUI.getJarPath().getText()).getName().replace(" ", "\\ "), "-o true"};
                 }
-                String commandstr = "java -XX:MaxPermSize=128M -Xmx" + Main.mainGUI.memoryBash.getText() + "M " + "-jar " + new File(Main.mainGUI.jarPath.getText()).getAbsolutePath().replace(" ", "\\ ") + " -o true";
+                String commandstr = "java -XX:MaxPermSize=128M -Xmx" + Main.getSettings().getMemBash() + "M " + "-jar " + new File(Main.mainGUI.getJarPath().getText()).getAbsolutePath().replace(" ", "\\ ") + " -o true";
                 //System.out.println("Commands: " + Arrays.toString(commands));
                 //System.out.println("Command: " + commandstr);
-                System.out.println("Launching " + Main.mainGUI.jarPath.getText() + " with " + Main.mainGUI.memoryBash.getText() + "MBs of memory .");
+                System.out.println("Launching " + Main.mainGUI.getJarPath().getText() + " with " + Main.getSettings().getMemBash() + "MBs of memory.");
 
                 if (ssh)
                 {
 
-                    String host = Main.mainGUI.sshHost.getText();
-                    String username = Main.mainGUI.sshUsername.getText();
-                    String password = "";
+                    String host = Main.getSettings().getSSHHost();
+                    String username = Main.getSettings().getSSHUsername();
+                    String password = Main.getSettings().getSSHPassword();
                     String passwordMask = "";
-                    char echoChar = Main.mainGUI.sshPassword.getEchoChar();
-
-                    for (char c : Main.mainGUI.sshPassword.getPassword())
-                    {
-                        password += c;
-                    }
 
                     for (int i = 0; i < password.length(); i++)
                     {
-                        passwordMask += echoChar;
+                        passwordMask += "*";
                     }
 
                     System.out.println("[Lava Control] Initiating SSH connection.");
@@ -131,10 +125,15 @@ public class ProcessThread extends Thread
                     BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     BufferedWriter stdin = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
                     Main.consoleGUI.createConsoleInput(stdin);
-                    Main.mainGUI.p = p;
+                    Main.mainGUI.setProcess(p);
 
                     while ((s = stdout.readLine()) != null)
                     {
+                        if(Main.consoleGUI.getNextWillBeError())
+                        {
+                            ErrorDetection.determineErrorQueues(s);
+                            Main.consoleGUI.setNextWillBeError(false);
+                        }
                         Main.consoleGUI.determineQueues(s);
                         System.out.println(s);
                     }
@@ -156,8 +155,8 @@ public class ProcessThread extends Thread
 
                     Main.consoleGUI.disableWindow();
                     Thread.currentThread().interrupt();
-                    Main.consoleGUI.consoleThread.interrupt();
-                    Main.mainGUI.launchJar.setToolTipText("");
+                    Main.consoleGUI.getConsoleThread().interrupt();
+                    Main.mainGUI.getLaunchJar().setToolTipText("");
                 }
             }
             catch (IOException e)
@@ -170,7 +169,7 @@ public class ProcessThread extends Thread
         Main.consoleGUI.determineQueues("[LavaControl] --Stopped");
         Main.consoleGUI.disableWindow();
         Thread.currentThread().interrupt();
-        Main.consoleGUI.consoleThread.interrupt();
-        Main.mainGUI.launchJar.setToolTipText("");
+        Main.consoleGUI.getConsoleThread().interrupt();
+        Main.mainGUI.getLaunchJar().setToolTipText("");
     }
 }
