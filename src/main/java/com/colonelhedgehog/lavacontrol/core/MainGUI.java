@@ -4,7 +4,9 @@ import com.colonelhedgehog.lavacontrol.core.components.JCheckBoxList;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.swing.*;
-import java.awt.Image;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -30,7 +32,6 @@ public class MainGUI
     private JButton optionsButton;
 
     private Process process;
-    private ProcessBuilder pb;
     private JCheckBoxList checkList;
 
     public MainGUI()
@@ -62,6 +63,48 @@ public class MainGUI
             }
         });
 
+        final Font defaultFont = jarPath.getFont();
+        final boolean[] wasDifferent = new boolean[1];
+
+        jarPath.getDocument().addDocumentListener(new DocumentListener()
+        {
+            public void changedUpdate(DocumentEvent e)
+            {
+                doCheck();
+            }
+
+            public void removeUpdate(DocumentEvent e)
+            {
+                doCheck();
+            }
+
+            public void insertUpdate(DocumentEvent e)
+            {
+                doCheck();
+            }
+
+            private void doCheck()
+            {
+                if (!jarPath.getText().equals(Main.settings.getLastPath()))
+                {
+                    Font font = new Font(defaultFont.getName(), Font.ITALIC, defaultFont.getSize());
+                    jarPath.setFont(font);
+
+                    jarPath.setForeground(new Color(127, 127, 127));
+                    wasDifferent[0] = true;
+                }
+                else
+                {
+                    if (wasDifferent[0])
+                    {
+                        wasDifferent[0] = false;
+                        jarPath.setFont(defaultFont);
+                        jarPath.setForeground(new Color(0, 0, 0));
+                    }
+                }
+            }
+        });
+
         jarPath.addActionListener(new ActionListener()
         {
             @Override
@@ -80,8 +123,17 @@ public class MainGUI
                             JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
                             return;
                         }
+
                         jarPath.setText(apath);
                         Main.listJars(new File(new File(apath).getParent() + "/plugins"));
+
+                        Main.getSettings().setLastPath(apath);
+
+                        doGreenHiglight();
+
+                        wasDifferent[0] = false;
+                        jarPath.setFont(defaultFont);
+                        jarPath.setForeground(new Color(0, 0, 0));
                     }
                     else
                     {
@@ -100,6 +152,37 @@ public class MainGUI
             }
         });
     }
+
+    private Timer timer;
+
+    private void doGreenHiglight()
+    {
+        if (timer != null && timer.isRunning())
+        {
+            timer.stop();
+        }
+
+        timer = new Timer(3, new ActionListener()
+        {
+            private int x = 0;
+
+            public void actionPerformed(ActionEvent ae)
+            {
+                jarPath.setBackground(new Color(140 + x, 255, 140 + x));
+
+                if (140 + x >= 255)
+                {
+                    timer.stop();
+                    return;
+                }
+
+                x++;
+            }
+        });
+
+        timer.start();
+    }
+
 
     public void launch()
     {

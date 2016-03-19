@@ -6,6 +6,6 @@ package com.colonelhedgehog.lavacontrol.core;
 public class ServerStatic
 {
     public static boolean serverInitialized = false;
-    public static int initialWorlds;
+    public static int initialWorlds = 0;
     public static int loadedPlugins = 0;
 }

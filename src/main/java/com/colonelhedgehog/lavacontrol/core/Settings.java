@@ -29,7 +29,7 @@ public class Settings
 
     public void saveSettings()
     {
-        if(Main.mainGUI == null)
+        if (Main.mainGUI == null)
         {
             return; // One of them fine.
         }
@@ -48,7 +48,10 @@ public class Settings
             return;
         }
 
-        System.out.println("[Lava Control] Created a new settings file in: \"" + f.getAbsolutePath() + "\"");
+        if (Main.consoleFrame == null || !Main.consoleFrame.isVisible())
+        {
+            System.out.println("[Lava Control] Created a new settings file in: \"" + f.getAbsolutePath() + "\"");
+        }
 
 
         BufferedWriter bw;
@@ -83,7 +86,7 @@ public class Settings
         maxConsoleLines = 100;
         sshUsername = "Username";
         sshHost = "Host";
-        sshPassword= "";
+        sshPassword = "";
         sshEnabled = false;
         lastPath = "/";
         stickyScrollBar = true;
@@ -97,15 +100,15 @@ public class Settings
             {
                 BufferedReader br = new BufferedReader(new FileReader(f));
                 String line;
-                while((line = br.readLine()) != null)
+                while ((line = br.readLine()) != null)
                 {
-                    if(line.startsWith("$memory = "))
+                    if (line.startsWith("$memory = "))
                     {
                         try
                         {
                             memBash = Integer.parseInt(line.replace("$memory = ", ""));
                         }
-                        catch(NumberFormatException nfe)
+                        catch (NumberFormatException nfe)
                         {
                             System.out.println("[Lava Control] Strange error occurred. $memory was not an integer. Reverting to defaults.");
                         }
@@ -134,19 +137,19 @@ public class Settings
                     {
                         sshHost = line.replace("$sshhost = ", "");
                     }
-                    else if(line.startsWith("$path = "))
+                    else if (line.startsWith("$path = "))
                     {
                         lastPath = line.replace("$path = ", "");
                     }
-                    else if(line.startsWith("$stickyscrollbar = "))
+                    else if (line.startsWith("$stickyscrollbar = "))
                     {
                         stickyScrollBar = Boolean.parseBoolean(line.replace("$stickyscrollbar = ", ""));
                     }
-                    else if(line.startsWith("$closewindowonstop = "))
+                    else if (line.startsWith("$closewindowonstop = "))
                     {
                         closeWindowOnStop = Boolean.parseBoolean(line.replace("$closewindowonstop = ", ""));
                     }
-                    else if(line.startsWith("$askexportlog = "))
+                    else if (line.startsWith("$askexportlog = "))
                     {
                         askExportLog = Boolean.parseBoolean(line.replace("$askexportlog = ", ""));
                     }
@@ -263,7 +266,7 @@ public class Settings
     {
         File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
 
-        if(f.exists())
+        if (f.exists())
         {
             f.delete();
         }

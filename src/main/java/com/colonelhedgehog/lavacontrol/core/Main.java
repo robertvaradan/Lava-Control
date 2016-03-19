@@ -100,7 +100,7 @@ public class Main
         consoleGUI = new ConsoleGUI();
 
 
-        final ImageIcon scaled = new ImageIcon(getIcon().getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
+        final ImageIcon scaled = new ImageIcon(getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
 
         consoleFrame.setContentPane(consoleGUI.getConsolePanel());
         consoleFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -119,6 +119,35 @@ public class Main
             @Override
             public void windowClosing(WindowEvent e)
             {
+                if(mainGUI.getProcess().isAlive() && !consoleGUI.getStopButton().getText().equals("Stopping..."))
+                {
+                    String[] buttons = {"Cancel", "Leave Running", "Kill", "Stop"};
+                    int result = JOptionPane.showOptionDialog(null, "Your server is still running!", "Your server has not been shut down yet. Would you\nlike to stop, kill, or leave your server running?",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, new ImageIcon(getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH)), buttons, buttons[3]);
+                    //System.out.println("Option \"" + result + "\" chosen!");
+
+                    switch (result)
+                    {
+                        case 0:
+                            //System.out.println("Option 0 is chosen so return.");
+                            return;
+                        case 1:
+                            //System.out.println("Option 1 is chosen so ignore.");
+                            break;
+                        case 2:
+                            //System.out.println("Option 2 is chosen so KILL.");
+                            consoleGUI.getKillButton().doClick();
+                            break;
+                        case 3:
+                            //System.out.println("Option 3 is chosen so STOP.");
+                            consoleGUI.getStopButton().doClick();
+                            break;
+
+                    }
+
+                    //System.out.println();
+                }
+
                 if(settings.getAskExportLog())
                 {
                     File cPath = new File(mainGUI.getJarPath().getText());
@@ -294,7 +323,7 @@ public class Main
 
     public static void createFileGUI()
     {
-        System.out.println("[Lava Control] Creating Lava Control's File Chooser GUI...");
+        //System.out.println("[Lava Control] Creating Lava Control's File Chooser GUI...");
         fileGUI = new FileGUI();
     }
 

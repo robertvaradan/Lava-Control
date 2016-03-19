@@ -37,85 +37,95 @@ public class SearchGUI
         currentIndex = 0;
         currentPosition = 0;
 
-        searchButton.addActionListener(new ActionListener()
-           {
-               @Override
-               public void actionPerformed(ActionEvent e)
-               {
-                   currentIndex = 0;
-                   currentPosition = 0;
-
-                   lastSearch = searchField.getText();
-
-                   indexList = FindTools.searchTextIndexes(Main.consoleGUI.getConsoleText(), lastSearch, matchCaseCheckBox.isSelected());
-
-                   if(indexList.size() == 0)
-                   {
-                       //System.out.println("Index list size is 0!");
-                       return;
-                   }
-
-                   //System.out.println("NEW LIST: " + indexList);
-                   int pos = indexList.get(currentIndex);
-                   currentPosition = pos + lastSearch.length();
-
-                   highlightPoints(pos, currentPosition);
-               }
-           }
-
-            );
-
-            nextResultButton.addActionListener(new
-
-            ActionListener()
-            {
-                @Override
-                public void actionPerformed (ActionEvent e)
+        searchButton.addActionListener(
+                new ActionListener()
                 {
-                    currentIndex++;
-
-                    if(currentIndex >= indexList.size())
+                    @Override
+                    public void actionPerformed(ActionEvent e)
                     {
                         currentIndex = 0;
+                        currentPosition = 0;
+
+                        lastSearch = searchField.getText();
+                        indexList = FindTools.searchTextIndexes(Main.consoleGUI.getConsoleText(), lastSearch, matchCaseCheckBox.isSelected());
+
+                        if (indexList.size() == 0)
+                        {
+                            //System.out.println("Index list size is 0!");
+                            nextResultButton.setEnabled(false);
+                            prevResultButton.setEnabled(false);
+                            return;
+                        }
+
+                        if (indexList.size() <= 1)
+                        {
+                            nextResultButton.setEnabled(false);
+                            prevResultButton.setEnabled(false);
+                        }
+                        else
+                        {
+                            nextResultButton.setEnabled(true);
+                            prevResultButton.setEnabled(true);
+                        }
+
+                        //System.out.println("NEW LIST: " + indexList);
+                        int pos = indexList.get(currentIndex);
+                        currentPosition = pos + lastSearch.length();
+
+                        highlightPoints(pos, currentPosition);
                     }
-
-                    int pos = indexList.get(currentIndex);
-                    currentPosition = pos + lastSearch.length();
-
-                    highlightPoints(pos, currentPosition);
                 }
-            }
 
-            );
+        );
 
-            prevResultButton.addActionListener(new
-
-            ActionListener()
-            {
-                @Override
-                public void actionPerformed (ActionEvent e)
+        nextResultButton.addActionListener(
+                new ActionListener()
                 {
-                    currentIndex--;
-
-                    if(currentIndex == 0)
+                    @Override
+                    public void actionPerformed(ActionEvent e)
                     {
-                        currentIndex = indexList.size() - 1;
+                        currentIndex++;
+
+                        if (currentIndex >= indexList.size())
+                        {
+                            currentIndex = 0;
+                        }
+
+                        int pos = indexList.get(currentIndex);
+                        currentPosition = pos + lastSearch.length();
+
+                        highlightPoints(pos, currentPosition);
                     }
-
-                    int pos = indexList.get(currentIndex);
-                    currentPosition = pos + lastSearch.length();
-
-                    highlightPoints(pos, currentPosition);
                 }
-            }
 
-            );
-        }
+        );
+
+        prevResultButton.addActionListener(
+                new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        currentIndex--;
+
+                        if (currentIndex <= 0)
+                        {
+                            currentIndex = indexList.size() - 1;
+                        }
+
+                        int pos = indexList.get(currentIndex);
+                        currentPosition = pos + lastSearch.length();
+
+                        highlightPoints(pos, currentPosition);
+                    }
+                }
+        );
+    }
 
     private void highlightPoints(int start, int end)
     {
         JTextArea textArea = Main.consoleGUI.getConsoleText();
-        textArea.requestFocusInWindow();
+        textArea.grabFocus();
 
         Rectangle viewRect = null;
 
@@ -131,7 +141,8 @@ public class SearchGUI
         textArea.scrollRectToVisible(viewRect);
         textArea.setCaretPosition(end);
         textArea.moveCaretPosition(start);
-        textArea.requestFocus();
+        //textArea.setRequestFocusEnabled(true);
+        //textArea.requestFocus();
     }
 
     public Container getSearchPanel()

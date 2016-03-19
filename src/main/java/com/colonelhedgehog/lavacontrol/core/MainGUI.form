@@ -29,7 +29,7 @@
         </constraints>
         <properties>
           <text value="/"/>
-          <toolTipText value="Press &quot;return&quot; in the field to update the jar list. "/>
+          <toolTipText value="Press &quot;return&quot; in the field to update the jar list and save the settings."/>
         </properties>
       </component>
       <component id="2bf2d" class="javax.swing.JButton" binding="chooseJar">

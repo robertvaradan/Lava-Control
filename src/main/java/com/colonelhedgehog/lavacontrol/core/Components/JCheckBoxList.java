@@ -1,5 +1,7 @@
 package com.colonelhedgehog.lavacontrol.core.components;
 
+import com.colonelhedgehog.lavacontrol.core.Main;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -35,6 +37,7 @@ public class JCheckBoxList extends JList<JCheckBox>
                     repaint();
 
                     final String oldname = checkBox.getText();
+
                     if (!checkBox.isSelected())
                     {
                         checkBox.setName(checkBox.getText().substring(0, checkBox.getText().length() - 4) + "._jar");
@@ -46,7 +49,21 @@ public class JCheckBoxList extends JList<JCheckBox>
                     //System.out.println("Changed! Sel: " + checkBox.isSelected() + ", Name: " + checkBox.getName());
                     checkBox.setText(checkBox.getName());
                     String base = new File(lastPath).getParent() + "/plugins/";
+                    File newFile = new File(base + checkBox.getText());
+
+                    boolean delete = false;
+                    if(newFile.exists())
+                    {
+                        delete = newFile.delete();
+                    }
+
                     boolean rename = new File(base + oldname).renameTo(new File(base + checkBox.getText()));
+
+                    if(delete)
+                    {
+                        Main.mainGUI.getJarPath().setText(lastPath);
+                        Main.mainGUI.getJarPath().postActionEvent();
+                    }
                 }
             }
         });
@@ -69,7 +86,7 @@ public class JCheckBoxList extends JList<JCheckBox>
                 boolean isSelected, boolean cellHasFocus)
         {
             //Drawing checkbox, change the appearance here
-            Color grey = Color.getHSBColor(0, 0, 0.90F);
+            Color grey = Color.getHSBColor(0, 0, 0.98F);
             Color color = (index % 2 == 0 ? Color.white : grey);
 
             value.setBackground(isSelected ? getSelectionBackground()

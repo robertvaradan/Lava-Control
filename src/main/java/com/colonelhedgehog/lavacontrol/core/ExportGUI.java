@@ -35,10 +35,10 @@ public class ExportGUI
                 {
                     File chosen = fc.getSelectedFile().isDirectory() ? fc.getSelectedFile() : fc.getSelectedFile().getParentFile();
                     Date date = new Date(System.currentTimeMillis());
-                    SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy_HH.mm.ss");
+                    SimpleDateFormat df2 = new SimpleDateFormat("MM-dd-yy, HH.mm.ss");
                     String dateText = df2.format(date);
 
-                    File log = new File(chosen + "/LavaControl_" + dateText + ".log");
+                    File log = new File(chosen, "Lava Control @ " + dateText + ".log");
 
                     try
                     {

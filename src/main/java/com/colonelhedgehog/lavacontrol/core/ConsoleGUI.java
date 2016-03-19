@@ -30,6 +30,7 @@ public class ConsoleGUI
     private JButton sendCommand;
     private SmoothJProgressBar commandProgress;
     private JButton searchButton;
+    private JCheckBox keepScrollbarAtBottomCheckBox;
     private InputStream in;
     private BufferedWriter writer;
     private Thread consoleThread;
@@ -40,6 +41,9 @@ public class ConsoleGUI
 
     public ConsoleGUI()
     {
+
+        final Settings settings = Main.getSettings();
+        settings.reloadSettings();
 
         //in = new JTextFieldInputStream(consoleInput);
         //char c;
@@ -68,6 +72,9 @@ public class ConsoleGUI
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         consoleText.setCaret(caret);
         commandProgress.setValue(0);
+        keepScrollbarAtBottomCheckBox.setSelected(settings.getStickyScrollBar());
+        keepScrollbarAtBottomCheckBox.addActionListener(stickyListener);
+
 
         final int mask = Main.isMac() ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
         KeyStroke killKey = KeyStroke.getKeyStroke(KeyEvent.VK_K, mask);
@@ -122,7 +129,7 @@ public class ConsoleGUI
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            if(Main.searchGUI == null)
+            if (Main.searchGUI == null)
             {
                 Main.searchGUI = new SearchGUI();
                 Main.searchDialog = new JDialog(Main.consoleFrame, "Search the console log...");
@@ -166,6 +173,18 @@ public class ConsoleGUI
         }
     };
 
+    final ActionListener stickyListener = new ActionListener()
+    {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            final Settings settings = Main.getSettings();
+            settings.setStickyScrollBar(keepScrollbarAtBottomCheckBox.isSelected());
+            settings.saveSettings();
+            settings.reloadSettings();
+        }
+    };
+
     final ActionListener exportLogListener = new ActionListener()
     {
         @Override
@@ -204,7 +223,8 @@ public class ConsoleGUI
                             commandProgress.setValue(100 * 100);
                             writer.flush();
                             index++;
-                        } catch (IOException e)
+                        }
+                        catch (IOException e)
                         {
                             e.printStackTrace();
                         }
@@ -256,14 +276,13 @@ public class ConsoleGUI
         nextWillBeError = false;
         ServerStatic.serverInitialized = false;
 
-        if(Main.settings.getCloseWindowOnStop())
+        if (Main.settings.getCloseWindowOnStop())
         {
             Main.consoleFrame.setVisible(false);
         }
     }
 
     private double factor = 0;
-
 
 
     public void determineQueues(String str)
@@ -276,7 +295,7 @@ public class ConsoleGUI
         if (!ServerStatic.serverInitialized)
         {
             // Plugin stuff
-            if(str.matches("\\[(\\w+)\\] Loading (\\w+) v/"))
+            if (str.matches("\\[(\\w+)\\] Loading (\\w+) v/"))
             {
                 ServerStatic.loadedPlugins++;
                 return;
@@ -284,45 +303,46 @@ public class ConsoleGUI
 
             // Standard status stuff
 
+            int mod = 100;
+            int max = 100 * mod;
+
             if (str.matches("Loading libraries, please wait..."))
             {
-                commandProgress.setValue(100 * 10);
+                commandProgress.setValue(mod * 10);
                 return;
             }
 
             if (str.matches(info + "Starting minecraft server version \\d+.\\d+.\\d+"))
             {
-                commandProgress.setValue(100 * 25);
+                commandProgress.setValue(mod * 25);
                 return;
             }
 
             if (str.matches(info + "Default game type: (\\w+)"))
             {
-                commandProgress.setValue(100 * 60);
+                commandProgress.setValue(mod * 40);
                 return;
             }
 
             if (str.matches(info + "Starting Minecraft server on \\*\\:\\d+"))
             {
-                commandProgress.setValue(100 * 80);
+                commandProgress.setValue(mod * 50);
                 return;
             }
 
-            if(commandProgress.getValue() < 100)
+            if (commandProgress.getValue() < max)
             {
                 if ((str.startsWith("[Multiverse\\-Core] Loading World & Settings - ") || str.matches(info + "\\-\\-\\-\\-\\-\\-\\-\\- World Settings For \\[([^)]+)\\] \\-\\-\\-\\-\\-\\-\\-\\-")))
                 {
-                    commandProgress.setValue(100 * commandProgress.getValue() + 1); // lol, if you have 20 worlds...
-                    return;
+                    commandProgress.setValue((commandProgress.getValue()) + (mod * 2)); // lol, if you have 25 worlds...
                 }
-
-                if(str.matches("\\[(\\w+)\\] Enabling (\\w+) v"))
+                else if (str.matches("\\[(\\w+)\\] Enabling (\\w+) v"))
                 {
-                    if(factor == 0)
+                    if (factor == 0)
                     {
-                        int headroom = 100 - commandProgress.getValue();
+                        int headroom = (max) - commandProgress.getValue();
 
-                        if(headroom > 1)
+                        if (headroom > 1)
                         {
                             factor = headroom / ServerStatic.loadedPlugins;
                         }
@@ -333,10 +353,9 @@ public class ConsoleGUI
                         return;
                     }
 
-                    if(factor != -1)
+                    if (factor != -1)
                     {
-                        commandProgress.setValue((int) ((commandProgress.getValue() + factor) * 100));
-                        return;
+                        commandProgress.setValue((int) ((commandProgress.getValue() + factor) * (max)));
                     }
                 }
             }
@@ -344,7 +363,7 @@ public class ConsoleGUI
             if (str.matches(info + "Done \\(\\d+.\\d+s\\)\\! For help, type \\\"help\" or \\\"\\?\""))
             {
                 commandProgress.setIndeterminate(false);
-                commandProgress.setValue(100 * 100);
+                commandProgress.setValue(max);
                 ServerStatic.serverInitialized = true;
             }
         }
@@ -400,8 +419,13 @@ public class ConsoleGUI
         return searchButton;
     }
 
-    private void createUIComponents()
+    public JButton getStopButton()
     {
-        // TODO: place custom component creation code here
+        return stopButton;
+    }
+
+    public JButton getKillButton()
+    {
+        return killButton;
     }
 }
