@@ -1,11 +1,9 @@
 package com.colonelhedgehog.lavacontrol.core;
 
-import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 
 /*
  *  Create a simple console to display text messages.
@@ -87,6 +85,16 @@ public class MessageConsole
         System.setErr(new PrintStream(cos, true));
     }
 
+    public void directBackErr()
+    {
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.err)));
+    }
+
+    public void directBackOut()
+    {
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+    }
+
     /*
      *  To prevent memory from being used up you can control the number of
      *  lines to display in the console
@@ -97,7 +105,9 @@ public class MessageConsole
     public void setMessageLines(int lines)
     {
         if (limitLinesListener != null)
+        {
             document.removeDocumentListener(limitLinesListener);
+        }
 
         limitLinesListener = new LimitLinesDocumentListener(lines, isAppend);
         document.addDocumentListener(limitLinesListener);
@@ -109,7 +119,7 @@ public class MessageConsole
      *  The text displayed in the Document can be color coded to indicate
      *  the output source.
      */
-    class ConsoleOutputStream extends ByteArrayOutputStream
+    private class ConsoleOutputStream extends ByteArrayOutputStream
     {
         private final String EOL = System.getProperty("line.separator");
         private SimpleAttributeSet attributes;
@@ -131,7 +141,9 @@ public class MessageConsole
             this.printStream = printStream;
 
             if (isAppend)
+            {
                 isFirstLine = true;
+            }
         }
 
         /*
@@ -148,12 +160,19 @@ public class MessageConsole
         {
             String message = toString();
 
-            if (message.length() == 0) return;
+            if (message.length() == 0)
+            {
+                return;
+            }
 
             if (isAppend)
+            {
                 handleAppend(message);
+            }
             else
+            {
                 handleInsert(message);
+            }
 
             reset();
         }
@@ -171,7 +190,9 @@ public class MessageConsole
             //  message.
 
             if (document.getLength() == 0)
+            {
                 buffer.setLength(0);
+            }
 
             if (EOL.equals(message))
             {
@@ -219,7 +240,6 @@ public class MessageConsole
             isFirstLine = false;
             String line = buffer.toString();
 
-            JScrollPane scrollPane = Main.consoleGUI.getScrollPane();
             try
             {
                 if (isAppend)
@@ -233,7 +253,7 @@ public class MessageConsole
                     textComponent.setCaretPosition(0);
                 }
             }
-            catch (BadLocationException ble)
+            catch (BadLocationException ignored)
             {
             }
 

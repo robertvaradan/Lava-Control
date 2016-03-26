@@ -7,13 +7,13 @@
     <rowspec value="center:438px:grow"/>
     <rowspec value="center:42px:noGrow"/>
     <rowspec value="top:3dlu:noGrow"/>
-    <rowspec value="center:11px:noGrow"/>
-    <colspec value="fill:46dlu:noGrow"/>
-    <colspec value="fill:490px:grow"/>
-    <colspec value="fill:111px:noGrow"/>
+    <rowspec value="center:8px:noGrow"/>
+    <colspec value="left:46dlu:noGrow"/>
+    <colspec value="left:490px:grow"/>
+    <colspec value="right:111px:grow"/>
     <colspec value="right:103px:noGrow"/>
     <constraints>
-      <xy x="24" y="20" width="897" height="600"/>
+      <xy x="24" y="20" width="907" height="600"/>
     </constraints>
     <properties>
       <minimumSize width="800" height="600"/>
@@ -22,24 +22,16 @@
     <children>
       <component id="bfb36" class="javax.swing.JTextField" binding="jarPath">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
           <forms top="0" left="10" bottom="0" right="10" defaultalign-horz="false"/>
         </constraints>
         <properties>
+          <margin top="0" left="0" bottom="0" right="0"/>
+          <scrollOffset value="0"/>
           <text value="/"/>
           <toolTipText value="Press &quot;return&quot; in the field to update the jar list and save the settings."/>
-        </properties>
-      </component>
-      <component id="2bf2d" class="javax.swing.JButton" binding="chooseJar">
-        <constraints>
-          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-        <properties>
-          <text value="&amp;Choose Jar..."/>
-          <toolTipText value="Put the directory to your Bukkit/Spigot Jar here."/>
         </properties>
       </component>
       <scrollpane id="ca4c7" binding="pluginList">
@@ -49,6 +41,7 @@
         </constraints>
         <properties>
           <autoscrolls value="false"/>
+          <background color="-1"/>
           <horizontalScrollBarPolicy value="31"/>
           <opaque value="false"/>
           <toolTipText value="Uncheck a plugin and it will be renamed with a ._jar extension. Check to set the extension back to a .jar extension."/>
@@ -72,7 +65,7 @@
           <minimumSize width="200" height="60"/>
           <preferredSize width="200" height="60"/>
           <selected value="false"/>
-          <text value="Start Server"/>
+          <text value="&amp;Start Server"/>
           <verifyInputWhenFocusTarget value="false"/>
         </properties>
       </component>
@@ -97,11 +90,33 @@
       </component>
       <component id="34b3a" class="javax.swing.JButton" binding="optionsButton">
         <constraints>
-          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-          <forms top="0" left="0" bottom="0" right="5"/>
+          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms top="0" left="0" bottom="0" right="5" defaultalign-horz="false"/>
         </constraints>
         <properties>
           <text value="&amp;Options..."/>
+          <toolTipText value="Put the directory to your Bukkit/Spigot Jar here."/>
+        </properties>
+      </component>
+      <component id="2bf2d" class="javax.swing.JButton" binding="chooseJar">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <margin top="0" left="0" bottom="0" right="0"/>
+          <text value="&amp;Choose Jar..."/>
+          <toolTipText value="Put the directory to your Bukkit/Spigot Jar here."/>
+        </properties>
+      </component>
+      <component id="1cf2" class="javax.swing.JButton" binding="buildSpigotJar">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <margin top="0" left="0" bottom="0" right="0"/>
+          <text value="&amp;Build Bench..."/>
           <toolTipText value="Put the directory to your Bukkit/Spigot Jar here."/>
         </properties>
       </component>

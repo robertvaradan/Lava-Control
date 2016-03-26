@@ -17,7 +17,7 @@ public class SmoothJProgressBar extends JProgressBar
     public void setValue(final int destValue)
     {
         //System.out.println("Going to value: " + destValue);
-        if(currentFuture != null)
+        if (currentFuture != null)
         {
             currentFuture.cancel(true);
         }
@@ -37,15 +37,16 @@ public class SmoothJProgressBar extends JProgressBar
         {
             private int iteration = 0;
             private int easeOut = 0;
+
             public void run()
             {
-                iteration += distance/50;
+                iteration += distance / 50;
 
                 if (currentValue[0] < destValue)
                 {
                     double newValue = iteration;
 
-                    if(currentValue[0] / destValue >= 0.85)
+                    if (currentValue[0] / destValue >= 0.85)
                     {
                         easeOut++;
                         int easeValue = (int) (Math.pow(easeOut * 2, 2));
@@ -62,7 +63,7 @@ public class SmoothJProgressBar extends JProgressBar
                 }
                 else
                 {
-                    if(destValue == 10000)
+                    if (destValue == 10000)
                     {
                         superSetValue(0);
                     }

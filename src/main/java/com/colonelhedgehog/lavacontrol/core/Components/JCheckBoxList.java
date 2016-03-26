@@ -17,7 +17,7 @@ public class JCheckBoxList extends JList<JCheckBox>
 
     public JCheckBoxList(final String lastPath)
     {
-         jcbl = this;
+        jcbl = this;
         this.lastPath = lastPath;
         setCellRenderer(new CellRenderer());
         addMouseListener(new MouseAdapter()
@@ -28,7 +28,7 @@ public class JCheckBoxList extends JList<JCheckBox>
                 if (index != -1)
                 {
                     JCheckBox checkBox = getModel().getElementAt(index);
-                    if(!jcbl.isEnabled())
+                    if (!jcbl.isEnabled())
                     {
                         return;
                     }
@@ -52,14 +52,14 @@ public class JCheckBoxList extends JList<JCheckBox>
                     File newFile = new File(base + checkBox.getText());
 
                     boolean delete = false;
-                    if(newFile.exists())
+                    if (newFile.exists())
                     {
                         delete = newFile.delete();
                     }
 
                     boolean rename = new File(base + oldname).renameTo(new File(base + checkBox.getText()));
 
-                    if(delete)
+                    if (delete)
                     {
                         Main.mainGUI.getJarPath().setText(lastPath);
                         Main.mainGUI.getJarPath().postActionEvent();

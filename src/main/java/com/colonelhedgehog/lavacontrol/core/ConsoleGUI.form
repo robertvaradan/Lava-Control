@@ -50,6 +50,7 @@
           <component id="4ea30" class="javax.swing.JTextArea" binding="consoleText">
             <constraints/>
             <properties>
+              <editable value="false"/>
               <margin top="0" left="0" bottom="0" right="0"/>
               <text value=""/>
               <wrapStyleWord value="true"/>
@@ -69,6 +70,7 @@
           <focusTraversalPolicyProvider value="false"/>
           <focusable value="false"/>
           <indeterminate value="false"/>
+          <inheritsPopupMenu value="false"/>
           <maximum value="10000"/>
           <string value=""/>
           <value value="0"/>

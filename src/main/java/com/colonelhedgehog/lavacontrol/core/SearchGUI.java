@@ -12,6 +12,7 @@ import java.util.ArrayList;
 /**
  * Created by ColonelHedgehog on 8/4/15.
  */
+@SuppressWarnings("Convert2Lambda")
 public class SearchGUI
 {
     private JButton prevResultButton;
@@ -38,86 +39,71 @@ public class SearchGUI
         currentPosition = 0;
 
         searchButton.addActionListener(
-                new ActionListener()
-                {
-                    @Override
-                    public void actionPerformed(ActionEvent e)
+                e -> {
+                    currentIndex = 0;
+                    currentPosition = 0;
+
+                    lastSearch = searchField.getText();
+                    indexList = FindTools.searchTextIndexes(Main.consoleGUI.getConsoleText(), lastSearch, matchCaseCheckBox.isSelected());
+
+                    if (indexList.size() == 0)
                     {
-                        currentIndex = 0;
-                        currentPosition = 0;
-
-                        lastSearch = searchField.getText();
-                        indexList = FindTools.searchTextIndexes(Main.consoleGUI.getConsoleText(), lastSearch, matchCaseCheckBox.isSelected());
-
-                        if (indexList.size() == 0)
-                        {
-                            //System.out.println("Index list size is 0!");
-                            nextResultButton.setEnabled(false);
-                            prevResultButton.setEnabled(false);
-                            return;
-                        }
-
-                        if (indexList.size() <= 1)
-                        {
-                            nextResultButton.setEnabled(false);
-                            prevResultButton.setEnabled(false);
-                        }
-                        else
-                        {
-                            nextResultButton.setEnabled(true);
-                            prevResultButton.setEnabled(true);
-                        }
-
-                        //System.out.println("NEW LIST: " + indexList);
-                        int pos = indexList.get(currentIndex);
-                        currentPosition = pos + lastSearch.length();
-
-                        highlightPoints(pos, currentPosition);
+                        //System.out.println("Index list size is 0!");
+                        nextResultButton.setEnabled(false);
+                        prevResultButton.setEnabled(false);
+                        return;
                     }
+
+                    if (indexList.size() <= 1)
+                    {
+                        nextResultButton.setEnabled(false);
+                        prevResultButton.setEnabled(false);
+                    }
+                    else
+                    {
+                        nextResultButton.setEnabled(true);
+                        prevResultButton.setEnabled(true);
+                    }
+
+                    //System.out.println("NEW LIST: " + indexList);
+                    int pos = indexList.get(currentIndex);
+                    currentPosition = pos + lastSearch.length();
+
+                    highlightPoints(pos, currentPosition);
                 }
 
         );
 
         nextResultButton.addActionListener(
-                new ActionListener()
-                {
-                    @Override
-                    public void actionPerformed(ActionEvent e)
+                e -> {
+                    currentIndex++;
+
+                    if (currentIndex >= indexList.size())
                     {
-                        currentIndex++;
-
-                        if (currentIndex >= indexList.size())
-                        {
-                            currentIndex = 0;
-                        }
-
-                        int pos = indexList.get(currentIndex);
-                        currentPosition = pos + lastSearch.length();
-
-                        highlightPoints(pos, currentPosition);
+                        currentIndex = 0;
                     }
+
+                    int pos = indexList.get(currentIndex);
+                    currentPosition = pos + lastSearch.length();
+
+                    highlightPoints(pos, currentPosition);
                 }
 
         );
 
         prevResultButton.addActionListener(
-                new ActionListener()
-                {
-                    @Override
-                    public void actionPerformed(ActionEvent e)
+                e -> {
+                    currentIndex--;
+
+                    if (currentIndex <= 0)
                     {
-                        currentIndex--;
-
-                        if (currentIndex <= 0)
-                        {
-                            currentIndex = indexList.size() - 1;
-                        }
-
-                        int pos = indexList.get(currentIndex);
-                        currentPosition = pos + lastSearch.length();
-
-                        highlightPoints(pos, currentPosition);
+                        currentIndex = indexList.size() - 1;
                     }
+
+                    int pos = indexList.get(currentIndex);
+                    currentPosition = pos + lastSearch.length();
+
+                    highlightPoints(pos, currentPosition);
                 }
         );
     }

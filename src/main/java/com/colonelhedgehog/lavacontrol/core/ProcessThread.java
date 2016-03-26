@@ -42,7 +42,7 @@ public class ProcessThread extends Thread
                 File path = new File(jarPath.getText());
 
                 String[] commands;
-                if (System.getProperty("java.version").startsWith("1.8"))
+                if (Float.parseFloat(System.getProperty("java.class.version")) >= 52.0)
                 {
                     commands = new String[]{"java", "-Xmx" + Main.getSettings().getMemBash() + "M", "-jar", new File(Main.mainGUI.getJarPath().getText()).getName().replace(" ", "\\ "), "-o true"};
                 }
@@ -68,7 +68,7 @@ public class ProcessThread extends Thread
                         passwordMask += "*";
                     }
 
-                    System.out.println("[Lava Control] Initiating SSH connection.");
+                    System.out.println(Main.Prefix + "Initiating SSH connection.");
                     System.out.println("- Host IP: " + host);
                     System.out.println("- Username: " + username);
 
@@ -98,7 +98,7 @@ public class ProcessThread extends Thread
                     }
 
                     channel.disconnect();
-                    System.out.println("[Lava Control] SSH session ended.");
+                    System.out.println(Main.Prefix + "SSH session ended.");
                     channel.getInputStream().close();
                     channel.getOutputStream().close();*/
                 }
@@ -116,10 +116,10 @@ public class ProcessThread extends Thread
 
 
                     //String[] commands = {"java", "-Xmx" + mem + "M", "-XX:MaxPermSize=128M", "-jar", path.getAbsolutePath(), "-o", "true"};
-                    //System.out.println("[Lava Control] Launching " + file + ". Using " + mem + " megabytes of memory. ");
+                    //System.out.println(Main.Prefix + "Launching " + file + ". Using " + mem + " megabytes of memory. ");
 
 
-                    pb.redirectErrorStream(true);
+                    //pb.redirectErrorStream(true);
                     Process p = pb.start();
                     String s;
                     BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -153,23 +153,19 @@ public class ProcessThread extends Thread
 
                     p.destroy();
 
-                    Main.consoleGUI.disableWindow();
                     Thread.currentThread().interrupt();
                     Main.consoleGUI.getConsoleThread().interrupt();
-                    Main.mainGUI.getLaunchJar().setToolTipText("");
                 }
             }
             catch (IOException e)
             {
-                System.out.println("[Lava Control] ERROR: Couldn't launch " + file + "! Are any of the arguments incorrect?");
+                System.out.println(Main.Prefix + "ERROR: Couldn't launch " + file + "! Are any of the arguments incorrect?");
                 e.printStackTrace();
             }
         }
 
         Main.consoleGUI.determineQueues("[LavaControl] --Stopped");
         Main.consoleGUI.disableWindow();
-        Thread.currentThread().interrupt();
-        Main.consoleGUI.getConsoleThread().interrupt();
         Main.mainGUI.getLaunchJar().setToolTipText("");
     }
 }

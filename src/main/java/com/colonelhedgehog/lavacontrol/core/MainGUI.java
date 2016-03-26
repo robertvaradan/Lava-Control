@@ -1,5 +1,6 @@
 package com.colonelhedgehog.lavacontrol.core;
 
+import com.colonelhedgehog.lavacontrol.core.components.ComponentBorder;
 import com.colonelhedgehog.lavacontrol.core.components.JCheckBoxList;
 import com.sun.management.OperatingSystemMXBean;
 
@@ -20,6 +21,7 @@ import java.lang.management.ManagementFactory;
  * You have freedom to modify given sources. Please credit me as original author.
  * Keep in mind that this is not for sale.
  */
+@SuppressWarnings("Convert2Lambda")
 public class MainGUI
 {
     private JFrame frame;
@@ -30,36 +32,39 @@ public class MainGUI
     //private JList cList;
     private JScrollPane pluginList;
     private JButton optionsButton;
+    private JButton buildSpigotJar;
 
     private Process process;
     private JCheckBoxList checkList;
 
     public MainGUI()
     {
+        ComponentBorder componentBorder = new ComponentBorder(chooseJar);
+        componentBorder.install(jarPath);
+
         jarPath.setText(Main.getSettings().getLastPath());
         launchJar.setActionCommand("Launch");
-        launchJar.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
+        launchJar.addActionListener(e -> {
+            if (e.getActionCommand().equals("Launch"))
             {
-                if (e.getActionCommand().equals("Launch"))
-                {
-                    launch();
-                }
+                launch();
             }
         });
 
         chooseJar.setActionCommand("Click");
-        chooseJar.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
+        chooseJar.addActionListener(e -> {
+            if (e.getActionCommand().equals("Click"))
             {
-                if (e.getActionCommand().equals("Click"))
-                {
-                    Main.createFileGUI();
-                }
+                Main.createFileGUI();
+            }
+        });
+
+        buildSpigotJar.setActionCommand("Build");
+        buildSpigotJar.addActionListener(e ->
+        {
+            if (e.getActionCommand().equals("Build"))
+            {
+                Main.createBuildGUI();
             }
         });
 
@@ -85,7 +90,7 @@ public class MainGUI
 
             private void doCheck()
             {
-                if (!jarPath.getText().equals(Main.settings.getLastPath()))
+                if (!jarPath.getText().equals(Main.getSettings().getLastPath()))
                 {
                     Font font = new Font(defaultFont.getName(), Font.ITALIC, defaultFont.getSize());
                     jarPath.setFont(font);
@@ -105,52 +110,40 @@ public class MainGUI
             }
         });
 
-        jarPath.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
+        jarPath.addActionListener(e -> {
+            if (!Main.getSettings().getSSHEnabled())
             {
-                if (!Main.getSettings().getSSHEnabled())
+                File chosen = new File(jarPath.getText());
+                ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
+
+                if (chosen.exists())
                 {
-                    File chosen = new File(jarPath.getText());
-                    ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
-
-                    if (chosen.exists())
+                    String apath = chosen.getAbsolutePath();
+                    if (!chosen.getName().endsWith(".jar"))
                     {
-                        String apath = chosen.getAbsolutePath();
-                        if (!chosen.getName().endsWith(".jar"))
-                        {
-                            JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
-                            return;
-                        }
-
-                        jarPath.setText(apath);
-                        Main.listJars(new File(new File(apath).getParent() + "/plugins"));
-
-                        Main.getSettings().setLastPath(apath);
-
-                        doGreenHiglight();
-
-                        wasDifferent[0] = false;
-                        jarPath.setFont(defaultFont);
-                        jarPath.setForeground(new Color(0, 0, 0));
+                        JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + apath + "\" is not a Jar file.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
+                        return;
                     }
-                    else
-                    {
-                        JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + jarPath.getText() + "\" does not exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
-                    }
+
+                    jarPath.setText(apath);
+                    Main.listJars(new File(new File(apath).getParent() + "/plugins"));
+
+                    Main.getSettings().setLastPath(apath);
+
+                    doGreenHiglight();
+
+                    wasDifferent[0] = false;
+                    jarPath.setFont(defaultFont);
+                    jarPath.setForeground(new Color(0, 0, 0));
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(Main.menuFrame, "ERROR: The file \"" + jarPath.getText() + "\" does not exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
                 }
             }
         });
 
-        optionsButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                Main.createPrefsGUI();
-            }
-        });
+        optionsButton.addActionListener(e -> Main.createPrefsGUI(Main.menuFrame));
     }
 
     private Timer timer;
@@ -186,10 +179,15 @@ public class MainGUI
 
     public void launch()
     {
-        Main.createConsoleGUI();
-
         ImageIcon scaled = new ImageIcon(Main.getIcon().getImage().getScaledInstance(96, 96, Image.SCALE_SMOOTH));
         final File jar = new File(jarPath.getText());
+
+        if(Main.buildFrame != null && Main.buildFrame.isVisible())
+        {
+            JOptionPane.showMessageDialog(frame, "ERROR: You are currently building a Spigot Jar. Wait for this process to end, first.", "Couldn't Launch Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
+            return;
+        }
+
         if (!jar.exists() && !Main.getSettings().getSSHEnabled())
         {
             JOptionPane.showMessageDialog(frame, "ERROR: The file \"" + jarPath.getText() + "\" doesn't exist.", "Couldn't Select Jar", JOptionPane.INFORMATION_MESSAGE, scaled);
@@ -217,7 +215,7 @@ public class MainGUI
             int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
             if (selected == JOptionPane.YES_OPTION)
             {
-                System.out.println("[Lava Control] *Gulp* Here goes... running with " + (512 - mem) + " less megabytes of memory than recommended.");
+                System.out.println(Main.Prefix + "*Gulp* Here goes... running with " + (512 - mem) + " fewer megabytes of memory than recommended.");
             }
             else
             {
@@ -229,7 +227,7 @@ public class MainGUI
             int selected = JOptionPane.showConfirmDialog(frame, "WARNING: You have specified more memory than your system has available. Do you wish to proceed?", "Couldn't Select Jar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, scaled);
             if (selected == JOptionPane.YES_OPTION)
             {
-                System.out.println("[Lava Control] *Gulp* Here goes... running with " + (maxMemory - mem) + " more megabytes memory than I have available.");
+                System.out.println(Main.Prefix + "*Gulp* Here goes... running with " + (maxMemory - mem) + " more megabytes memory than I have available.");
             }
             else
             {
@@ -242,6 +240,8 @@ public class MainGUI
         {
             createShellFile(jar.getParentFile());
         }
+
+        Main.createConsoleGUI();
 
         ProcessThread thread = new ProcessThread(jar.getAbsolutePath(), jarPath, mem, Main.getSettings().getSSHEnabled());
 

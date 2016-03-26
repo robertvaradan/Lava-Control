@@ -5,6 +5,7 @@ import com.colonelhedgehog.lavacontrol.core.components.SmoothJProgressBar;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -38,10 +39,10 @@ public class ConsoleGUI
     private List<String> messageHistory = new ArrayList<>();
     private boolean disabled = false;
     private boolean nextWillBeError = false;
+    private MessageConsole messageConsole;
 
     public ConsoleGUI()
     {
-
         final Settings settings = Main.getSettings();
         settings.reloadSettings();
 
@@ -68,9 +69,10 @@ public class ConsoleGUI
         exportLogButton.addActionListener(exportLogListener);
         consoleInput.setBorder(new RoundedCornerBorder(6));
         scrollPane.setBorder(new RoundedCornerBorder(6));
+
         DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         consoleText.setCaret(caret);
+
         commandProgress.setValue(0);
         keepScrollbarAtBottomCheckBox.setSelected(settings.getStickyScrollBar());
         keepScrollbarAtBottomCheckBox.addActionListener(stickyListener);
@@ -103,9 +105,16 @@ public class ConsoleGUI
         }
 
         consoleText.setCaret(caret);
+
+        messageConsole = new MessageConsole(consoleText);
+        messageConsole.redirectOut();
+        messageConsole.redirectErr(Color.RED, null);
+
+        int ml = Main.getSettings().getMaxConsoleLines();
+        messageConsole.setMessageLines(ml);
     }
 
-    final Action buttonAction = new AbstractAction()
+    private final Action buttonAction = new AbstractAction()
     {
         @Override
         public void actionPerformed(ActionEvent e)
@@ -115,7 +124,7 @@ public class ConsoleGUI
         }
     };
 
-    final ActionListener sendListener = new ActionListener()
+    private final ActionListener sendListener = new ActionListener()
     {
         @Override
         public void actionPerformed(ActionEvent e)
@@ -124,34 +133,29 @@ public class ConsoleGUI
         }
     };
 
-    final ActionListener searchListener = new ActionListener()
-    {
-        @Override
-        public void actionPerformed(ActionEvent e)
+    private final ActionListener searchListener = e -> {
+        if (Main.searchGUI == null)
         {
-            if (Main.searchGUI == null)
-            {
-                Main.searchGUI = new SearchGUI();
-                Main.searchDialog = new JDialog(Main.consoleFrame, "Search the console log...");
-                Main.searchDialog.setContentPane(Main.searchGUI.getSearchPanel());
-                Main.searchDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-                Main.searchGUI.getSearchField().setText(Main.searchGUI.getLastSearch());
-            }
-
-            Main.searchDialog.setBounds(0, 0, 450, 110);
-            Main.searchDialog.setResizable(false);
-            Main.searchDialog.setLocationRelativeTo(Main.consoleFrame);
-            Main.searchDialog.setVisible(true);
+            Main.searchGUI = new SearchGUI();
+            Main.searchDialog = new JDialog(Main.consoleFrame, "Search the console log...");
+            Main.searchDialog.setContentPane(Main.searchGUI.getSearchPanel());
+            Main.searchDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+            Main.searchGUI.getSearchField().setText(Main.searchGUI.getLastSearch());
         }
+
+        Main.searchDialog.setBounds(0, 0, 450, 110);
+        Main.searchDialog.setResizable(false);
+        Main.searchDialog.setLocationRelativeTo(Main.consoleFrame);
+        Main.searchDialog.setVisible(true);
     };
 
-    final ActionListener killListener = new ActionListener()
+    private final ActionListener killListener = new ActionListener()
     {
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            System.out.println("[Lava Control] >>> ! FORCE KILL: Destroying process, skipping save procedures. ! <<<");
-            System.out.println("[Lava Control] If possible, stop the server using the \"stop\" command/button to prevent issues.");
+            System.out.println(Main.Prefix + ">>> ! FORCE KILL: Destroying process, skipping save procedures. ! <<<");
+            System.out.println(Main.Prefix + "If possible, stop the server using the \"stop\" command/button to prevent issues.");
             consoleThread.interrupt();
 
             if (Main.mainGUI.getProcess() != null)
@@ -161,7 +165,7 @@ public class ConsoleGUI
         }
     };
 
-    final ActionListener stopListener = new ActionListener()
+    private final ActionListener stopListener = new ActionListener()
     {
         @Override
         public void actionPerformed(ActionEvent e)
@@ -173,26 +177,38 @@ public class ConsoleGUI
         }
     };
 
-    final ActionListener stickyListener = new ActionListener()
+    private final ActionListener stickyListener = new ActionListener()
     {
         @Override
         public void actionPerformed(ActionEvent e)
         {
+            boolean stick = keepScrollbarAtBottomCheckBox.isSelected();
+
             final Settings settings = Main.getSettings();
-            settings.setStickyScrollBar(keepScrollbarAtBottomCheckBox.isSelected());
+            settings.setStickyScrollBar(stick);
+
+            if (stick)
+            {
+                DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
+                caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+                consoleText.setCaret(caret);
+            }
+            else
+            {
+                DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
+                caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+                consoleText.setCaret(caret);
+            }
+
+
             settings.saveSettings();
             settings.reloadSettings();
         }
     };
 
-    final ActionListener exportLogListener = new ActionListener()
-    {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            ExportGUI exportGUI = new ExportGUI();
-            exportGUI.show();
-        }
+    private final ActionListener exportLogListener = e -> {
+        ExportGUI exportGUI = new ExportGUI();
+        exportGUI.show();
     };
 
     public void createConsoleInput(final BufferedWriter writer)
@@ -203,31 +219,26 @@ public class ConsoleGUI
             @Override
             public void run()
             {
-                consoleInput.addActionListener(new ActionListener()
-                {
-                    @Override
-                    public void actionPerformed(ActionEvent action)
+                consoleInput.addActionListener(action -> {
+                    try
                     {
-                        try
-                        {
-                            commandProgress.setValue(100 * 20);
-                            String cmd = consoleInput.getText();
-                            messageHistory.add(cmd);
-                            commandProgress.setValue(100 * 40);
+                        commandProgress.setValue(100 * 20);
+                        String cmd = consoleInput.getText();
+                        messageHistory.add(cmd);
+                        commandProgress.setValue(100 * 40);
 
-                            System.out.println("» /" + cmd);
-                            commandProgress.setValue(100 * 60);
-                            writer.write(cmd + "\n");
-                            commandProgress.setValue(100 * 80);
-                            consoleInput.setText("");
-                            commandProgress.setValue(100 * 100);
-                            writer.flush();
-                            index++;
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        System.out.println("» /" + cmd);
+                        commandProgress.setValue(100 * 60);
+                        writer.write(cmd + "\n");
+                        commandProgress.setValue(100 * 80);
+                        consoleInput.setText("");
+                        commandProgress.setValue(100 * 100);
+                        writer.flush();
+                        index++;
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
                     }
                 });
 
@@ -276,7 +287,7 @@ public class ConsoleGUI
         nextWillBeError = false;
         ServerStatic.serverInitialized = false;
 
-        if (Main.settings.getCloseWindowOnStop())
+        if (Main.getSettings().getCloseWindowOnStop())
         {
             Main.consoleFrame.setVisible(false);
         }
@@ -305,6 +316,11 @@ public class ConsoleGUI
 
             int mod = 100;
             int max = 100 * mod;
+
+            if (commandProgress.getValue() < (max * 0.8) && commandProgress.getValue() > 50 * mod)
+            {
+                commandProgress.setValue(commandProgress.getValue() + 50);
+            }
 
             if (str.matches("Loading libraries, please wait..."))
             {

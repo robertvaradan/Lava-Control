@@ -10,9 +10,15 @@ public class RoundedCornerBorder extends AbstractBorder
 {
     private int r;
 
-    public RoundedCornerBorder(int r)
+    public RoundedCornerBorder(int r, int insertRight)
     {
         this.r = r;
+        this.insertRight = insertRight;
+    }
+
+    public RoundedCornerBorder(int r)
+    {
+        this(r, 8);
     }
 
     @Override
@@ -34,16 +40,19 @@ public class RoundedCornerBorder extends AbstractBorder
         g2.dispose();
     }
 
+    private int insertRight;
+
     @Override
     public Insets getBorderInsets(Component c)
     {
-        return new Insets(4, 8, 4, 8);
+        return new Insets(4, 8, 4, insertRight);
     }
 
     @Override
     public Insets getBorderInsets(Component c, Insets insets)
     {
-        insets.left = insets.right = 8;
+        insets.left = 8;
+        insets.right = insertRight;
         insets.top = insets.bottom = 4;
         return insets;
     }

@@ -27,26 +27,12 @@ public class MacSetup
         Application application = Application.getApplication();
         PopupMenu popupmenu = new PopupMenu("Lava Control");
         MenuItem menuItem = new MenuItem("Start Server");
-        menuItem.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                Main.mainGUI.launch();
-            }
-        });
+        menuItem.addActionListener(e -> Main.mainGUI.launch());
         popupmenu.add(menuItem);
         application.setDockMenu(popupmenu);
         application.setDockIconImage(Main.getIcon().getImage());
-        application.setAboutHandler(new AboutHandler()
-        {
-            @Override
-            public void handleAbout(AppEvent.AboutEvent aboutEvent)
-            {
-                JOptionPane.showMessageDialog(Main.menuFrame, "Lava Control is a multi-platform application for making plugin development\n" +
-                        "less painful. This application was designed by ColonelHedgehog. You can view\n" +
-                        "his website at https://colonelhedgehog.com", "About Lava Control", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+        application.setAboutHandler(aboutEvent -> JOptionPane.showMessageDialog(Main.menuFrame, "Lava Control is a multi-platform application for making plugin development\n" +
+                "less painful. This application was designed by ColonelHedgehog. You can view\n" +
+                "his website at https://colonelhedgehog.com", "About Lava Control", JOptionPane.INFORMATION_MESSAGE));
     }
 }

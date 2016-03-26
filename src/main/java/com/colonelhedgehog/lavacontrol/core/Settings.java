@@ -10,6 +10,7 @@ import java.io.*;
  */
 public class Settings
 {
+    // MAIN GUI
     private int memBash;
     private int maxConsoleLines;
     private boolean sshEnabled;
@@ -18,9 +19,16 @@ public class Settings
     private String sshHost;
     private String lastPath;
 
+    // CONSOLE GUI
     private boolean stickyScrollBar;
     private boolean closeWindowOnStop;
     private boolean askExportLog;
+
+    // BUILD GUI
+    private boolean saveJarToPath;
+    private boolean generateDocs;
+    private boolean generateSources;
+    private String buildVersion;
 
     public Settings()
     {
@@ -29,12 +37,19 @@ public class Settings
 
     public void saveSettings()
     {
+        File old = new File(System.getProperty("user.home") + "/Library/Lava Control/");
+
+        if (old.exists())
+        {
+            old.renameTo(new File(old.getParentFile() + "/LavaControl/"));
+        }
+
         if (Main.mainGUI == null)
         {
             return; // One of them fine.
         }
 
-        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
+        File f = new File(System.getProperty("user.home") + "/Library/LavaControl/settings.ccq");
         f.delete();
 
         f.getParentFile().mkdirs();
@@ -50,7 +65,7 @@ public class Settings
 
         if (Main.consoleFrame == null || !Main.consoleFrame.isVisible())
         {
-            System.out.println("[Lava Control] Created a new settings file in: \"" + f.getAbsolutePath() + "\"");
+            System.out.println(Main.Prefix + "Created a new settings file in: \"" + f.getAbsolutePath() + "\"");
         }
 
 
@@ -68,7 +83,11 @@ public class Settings
             bw.write("\n$stickyscrollbar = " + stickyScrollBar);
             bw.write("\n$closewindowonstop = " + closeWindowOnStop);
             bw.write("\n$askexportlog = " + askExportLog);
-            bw.write("\n$sshpassword = " + Main.getSettings().getSSHPassword());
+            bw.write("\n$sshpassword = " + sshPassword);
+            bw.write("\n$savejarpath = " + saveJarToPath);
+            bw.write("\n$generatedocs = " + generateDocs);
+            bw.write("\n$generatesources = " + generateSources);
+            bw.write("\n$buildversion = " + buildVersion);
 
             bw.flush();
             bw.close();
@@ -89,11 +108,17 @@ public class Settings
         sshPassword = "";
         sshEnabled = false;
         lastPath = "/";
+
         stickyScrollBar = true;
         closeWindowOnStop = false;
         askExportLog = true;
 
-        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
+        saveJarToPath = true;
+        generateDocs = false;
+        generateSources = false;
+        buildVersion = "";
+
+        File f = new File(System.getProperty("user.home") + "/Library/LavaControl/settings.ccq");
         if (f.exists())
         {
             try
@@ -110,7 +135,7 @@ public class Settings
                         }
                         catch (NumberFormatException nfe)
                         {
-                            System.out.println("[Lava Control] Strange error occurred. $memory was not an integer. Reverting to defaults.");
+                            System.out.println(Main.Prefix + "Strange error occurred. $memory was not an integer. Reverting to defaults.");
                         }
                     }
                     else if (line.startsWith("$maxconsolelines = "))
@@ -152,6 +177,22 @@ public class Settings
                     else if (line.startsWith("$askexportlog = "))
                     {
                         askExportLog = Boolean.parseBoolean(line.replace("$askexportlog = ", ""));
+                    }
+                    else if (line.startsWith("$savejarpath = "))
+                    {
+                        saveJarToPath = Boolean.parseBoolean(line.replace("$savejarpath = ", ""));
+                    }
+                    else if (line.startsWith("$generatedocs = "))
+                    {
+                        generateDocs = Boolean.parseBoolean(line.replace("$generatedocs = ", ""));
+                    }
+                    else if (line.startsWith("$generatesources = "))
+                    {
+                        generateSources = Boolean.parseBoolean(line.replace("$generatesources = ", ""));
+                    }
+                    else if (line.startsWith("$buildversion = "))
+                    {
+                        buildVersion = line.replace("$buildversion = ", "");
                     }
                 }
             }
@@ -262,9 +303,29 @@ public class Settings
         this.askExportLog = askExportLog;
     }
 
+    public boolean saveJarToPath()
+    {
+        return saveJarToPath;
+    }
+
+    public boolean generateDocs()
+    {
+        return generateDocs;
+    }
+
+    public boolean generateSources()
+    {
+        return generateSources;
+    }
+
+    public String getBuildVersion()
+    {
+        return buildVersion;
+    }
+
     public void deleteSettings()
     {
-        File f = new File(System.getProperty("user.home") + "/Library/Lava Control/settings.ccq");
+        File f = new File(System.getProperty("user.home") + "/Library/LavaControl/settings.ccq");
 
         if (f.exists())
         {
@@ -272,5 +333,25 @@ public class Settings
         }
 
         reloadSettings();
+    }
+
+    public void setGenerateDocs(boolean generateDocs)
+    {
+        this.generateDocs = generateDocs;
+    }
+
+    public void setGenerateSources(boolean generateSources)
+    {
+        this.generateSources = generateSources;
+    }
+
+    public void setBuildVersion(String buildVersion)
+    {
+        this.buildVersion = buildVersion;
+    }
+
+    public void setSaveJarToPath(boolean saveJarToPath)
+    {
+        this.saveJarToPath = saveJarToPath;
     }
 }
